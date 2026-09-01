@@ -1,0 +1,66 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import portrait from '../assets/site/contact.jpg';
+
+const bio = [
+  'Arne Nys (b. 1998) is a Belgian artist living and working in Lichtaart. He works across sculpture, drawing, printmaking, and painting, exploring the relationship between material, time, and transformation.',
+  'Inspired by aquatic environments and natural processes such as flow, erosion, and renewal, his works evolve through cycles of building, painting, cutting, and reworking. These layered processes leave visible traces of time and reflect on deeper personal and societal undercurrents.',
+  'Nys approaches his practice intuitively and experimentally, allowing control and chance to interact. His works function like small ecosystems in which matter, thought, space, and time continuously influence one another.',
+];
+---
+
+<Base
+  title="Contact — Arne Nys"
+  description="Arne Nys (b. 1998) is a Belgian artist living and working in Lichtaart."
+  theme="sage"
+>
+  <div class="wrap contact">
+    <div class="bio">
+      {bio.map((para) => <h3>{para}</h3>)}
+    </div>
+
+    <div class="side">
+      <Image
+        src={portrait}
+        alt="Arne Nys in the studio"
+        widths={[600, 900, 1200]}
+        sizes="(max-width: 900px) 100vw, 40vw"
+      />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: start;
+    padding-block: clamp(2.5rem, 9vh, 6rem);
+  }
+
+  .bio {
+    display: grid;
+    gap: clamp(1.5rem, 3.5vh, 2.5rem);
+  }
+  /* The live site sets these paragraphs as headings, at heading size. */
+  .bio h3 {
+    color: var(--cream);
+    font-size: clamp(1.05rem, 1.55vw, 1.4rem);
+    line-height: 1.42;
+    letter-spacing: -0.012em;
+    max-width: 46ch;
+  }
+
+  .side {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

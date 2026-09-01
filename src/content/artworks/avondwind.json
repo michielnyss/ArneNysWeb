@@ -1,0 +1,41 @@
+{
+  "title": "Avondwind",
+  "year": 2024,
+  "order": 29,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/avondwind/01.jpg",
+      "alt": "Avondwind — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/avondwind/02.jpg",
+      "alt": "Avondwind — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/avondwind/03.jpg",
+      "alt": "Avondwind — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "avondwind"
+}

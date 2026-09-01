@@ -1,0 +1,61 @@
+{
+  "title": "Einstein",
+  "year": 2024,
+  "order": 6,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/einstein/01.jpg",
+      "alt": "Einstein — Arne Nys",
+      "width": 4121,
+      "height": 4121,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/einstein/02.jpg",
+      "alt": "Einstein — Arne Nys",
+      "width": 4251,
+      "height": 6192,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/einstein/03.jpg",
+      "alt": "Einstein — Arne Nys",
+      "width": 2499,
+      "height": 4444,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/einstein/04.jpg",
+      "alt": "Einstein — Arne Nys",
+      "width": 3213,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/einstein/05.jpg",
+      "alt": "Einstein — Arne Nys",
+      "width": 3024,
+      "height": 4032,
+      "focalPoint": {
+        "x": 0.33000001311302185,
+        "y": 0.38999998569488525
+      }
+    }
+  ],
+  "legacySlug": "einstein"
+}

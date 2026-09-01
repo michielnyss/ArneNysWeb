@@ -1,0 +1,198 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ArtworkGrid from '../../components/ArtworkGrid.astro';
+import YearFilter from '../../components/YearFilter.astro';
+import { sortArtworks, yearsOf } from '../../lib/artworks';
+
+/**
+ * Years and artwork slugs share the /artworks/ namespace, so one route
+ * resolves both: /artworks/2024/ lists a year, /artworks/tijdstroom/ is a work.
+ */
+export async function getStaticPaths() {
+  const artworks = sortArtworks(await getCollection('artworks'));
+  const years = yearsOf(artworks);
+
+  return [
+    ...years.map((year) => ({
+      params: { entry: String(year) },
+      props: { kind: 'year' as const, year, artworks: artworks.filter((a) => a.data.year === year) },
+    })),
+    ...artworks.map((work, i) => ({
+      params: { entry: work.id },
+      props: {
+        kind: 'work' as const,
+        work,
+        prev: artworks[(i - 1 + artworks.length) % artworks.length],
+        next: artworks[(i + 1) % artworks.length],
+      },
+    })),
+  ];
+}
+
+type Props =
+  | { kind: 'year'; year: number; artworks: CollectionEntry<'artworks'>[] }
+  | {
+      kind: 'work';
+      work: CollectionEntry<'artworks'>;
+      prev: CollectionEntry<'artworks'>;
+      next: CollectionEntry<'artworks'>;
+    };
+
+const props = Astro.props as Props;
+const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
+---
+
+{
+  props.kind === 'year' ? (
+    <Base title={`Artworks ${props.year} — Arne Nys`} theme="sage">
+      <div class="wrap">
+        <YearFilter years={allYears} active={props.year} />
+        <ArtworkGrid artworks={props.artworks} />
+      </div>
+    </Base>
+  ) : (
+    <Base
+      title={`${props.work.data.title} — Arne Nys`}
+      description={props.work.data.description || `${props.work.data.title}, a work by Arne Nys`}
+      theme="sage"
+    >
+      <nav class="crumbs wrap" aria-label="Breadcrumb">
+        <a href="/">Artworks</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{props.work.data.title}</span>
+      </nav>
+
+      <article class="work wrap">
+        <div class="plates">
+          {props.work.data.gallery.map((img, i) => (
+            <Image
+              src={img.src}
+              alt={img.alt || props.work.data.title}
+              widths={[600, 900, 1400]}
+              sizes="(max-width: 900px) 100vw, 62vw"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : undefined}
+            />
+          ))}
+        </div>
+
+        <aside class="details">
+          <h1>{props.work.data.title}</h1>
+          <dl>
+            {props.work.data.year && (
+              <>
+                <dt>Year</dt>
+                <dd>{props.work.data.year}</dd>
+              </>
+            )}
+            {props.work.data.medium && (
+              <>
+                <dt>Medium</dt>
+                <dd>{props.work.data.medium}</dd>
+              </>
+            )}
+            {props.work.data.dimensions && (
+              <>
+                <dt>Dimensions</dt>
+                <dd>{props.work.data.dimensions}</dd>
+              </>
+            )}
+          </dl>
+          {props.work.data.description && <p class="blurb">{props.work.data.description}</p>}
+
+          <nav class="pager" aria-label="Other works">
+            <a href={`/artworks/${props.prev.id}/`} rel="prev">← {props.prev.data.title}</a>
+            <a href={`/artworks/${props.next.id}/`} rel="next">{props.next.data.title} →</a>
+          </nav>
+        </aside>
+      </article>
+    </Base>
+  )
+}
+
+<style>
+  .crumbs {
+    max-width: none;
+    padding-inline: 1.5%;
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    padding-top: 0.25rem;
+    opacity: 0.85;
+  }
+  .crumbs a:hover {
+    border-bottom: 1px solid currentColor;
+  }
+
+  /* Proportions measured off the live page: narrow gutter, wide plate column. */
+  .work {
+    display: grid;
+    grid-template-columns: 65% minmax(0, 1fr);
+    gap: 9.5%;
+    align-items: start;
+    padding-top: clamp(1rem, 3vh, 2rem);
+    max-width: none;
+    padding-inline: 1.5%;
+  }
+
+  .plates {
+    display: grid;
+    gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  }
+
+  .details {
+    position: sticky;
+    top: clamp(1.5rem, 6vh, 4rem);
+  }
+  .details h1 {
+    color: var(--cream);
+    font-size: clamp(1.8rem, 3.2vw, 2.9rem);
+    margin-bottom: 1.5rem;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2rem 1.25rem;
+    margin: 0 0 1.5rem;
+    font-size: 0.8125rem;
+  }
+  dt {
+    opacity: 0.7;
+  }
+  dd {
+    margin: 0;
+  }
+
+  .blurb {
+    max-width: 34ch;
+    margin: 0 0 2rem;
+  }
+
+  .pager {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+  }
+  .pager a:hover {
+    border-bottom: 1px solid currentColor;
+  }
+
+  @media (max-width: 900px) {
+    .work {
+      grid-template-columns: 1fr;
+      gap: clamp(1.25rem, 4vw, 2rem);
+      padding-inline: var(--gutter);
+    }
+    .details {
+      position: static;
+      order: -1;
+    }
+  }
+</style>

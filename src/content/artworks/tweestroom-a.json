@@ -1,0 +1,31 @@
+{
+  "title": "Tweestroom A",
+  "year": 2024,
+  "order": 27,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/tweestroom-a/01.jpg",
+      "alt": "Tweestroom A — Arne Nys",
+      "width": 1638,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tweestroom-a/02.jpg",
+      "alt": "Tweestroom A — Arne Nys",
+      "width": 1638,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "tweestrooma"
+}

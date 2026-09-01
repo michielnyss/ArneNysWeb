@@ -1,0 +1,31 @@
+{
+  "title": "Fragment 7",
+  "year": 2024,
+  "order": 3,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/fragment-7-2/01.jpg",
+      "alt": "Fragment 7 — Arne Nys",
+      "width": 1638,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/fragment-7-2/02.jpg",
+      "alt": "Fragment 7 — Arne Nys",
+      "width": 1638,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "fragment4-7sjw9"
+}

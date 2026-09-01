@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.browser-profile/
+secrets.local.json
+.DS_Store
+
+# Raw Squarespace scrape (~260MB). Regenerate with `npm run crawl`.
+# src/content and src/assets are generated FROM this and are committed.
+extracted/

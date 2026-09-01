@@ -1,0 +1,161 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/site/logo.png';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Page background: cream (index) or sage (artwork, contact, gallery). */
+  theme?: 'cream' | 'sage';
+  /** A dark header sits over the homepage hero; elsewhere it is transparent. */
+  headerOverlay?: boolean;
+}
+
+const {
+  title,
+  description = 'Arne Nys is a Belgian artist working across sculpture, drawing, printmaking, and painting',
+  theme = 'cream',
+  headerOverlay = false,
+} = Astro.props;
+
+const path = Astro.url.pathname;
+const nav = [
+  { label: 'Artworks', href: '/' },
+  { label: 'Contact', href: '/contact/' },
+];
+const isCurrent = (href: string) =>
+  href === '/' ? path === '/' || path.startsWith('/artworks') : path.startsWith(href);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body data-theme={theme}>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class:list={['site-header', { overlay: headerOverlay }]}>
+      <div class="header-inner">
+        <a href="/" class="logo" aria-label="Atelier Nys — home">
+          <Image src={logo} alt="Atelier Nys" width={110} densities={[1, 2]} />
+        </a>
+        <nav aria-label="Main">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <a href="mailto:arne@ateliernys.com">arne@ateliernys.com</a>
+        <a href="https://www.instagram.com/atelier_nys/" rel="me noopener" target="_blank">
+          Instagram
+        </a>
+      </div>
+    </footer>
+
+    <style>
+      body[data-theme='sage'] {
+        background: var(--sage);
+        color: var(--cream);
+      }
+
+      .site-header {
+        position: relative;
+        z-index: 10;
+      }
+      .site-header.overlay {
+        background: var(--ink);
+      }
+
+      .header-inner {
+        max-width: var(--measure);
+        margin-inline: auto;
+        padding: 0.85rem var(--gutter);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+      }
+
+      .logo img {
+        width: 68px;
+        height: auto;
+      }
+      nav ul {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      nav a {
+        font-size: 0.8125rem;
+        letter-spacing: 0.03em;
+        padding-block: 0.25rem;
+        border-bottom: 1px solid transparent;
+      }
+      .site-header.overlay nav a {
+        color: var(--cream);
+      }
+      nav a[aria-current='page'],
+      nav a:hover {
+        border-bottom-color: currentColor;
+      }
+
+      .site-footer {
+        margin-top: clamp(4rem, 12vh, 9rem);
+        padding-block: 2.5rem 3rem;
+        font-size: 0.8125rem;
+      }
+      .footer-inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 2rem;
+      }
+      .footer-inner a {
+        border-bottom: 1px solid transparent;
+      }
+      .footer-inner a:hover {
+        border-bottom-color: currentColor;
+      }
+
+      @media (max-width: 640px) {
+        .logo img {
+          width: 54px;
+        }
+        nav ul {
+          gap: 1.1rem;
+        }
+      }
+    </style>
+  </body>
+</html>

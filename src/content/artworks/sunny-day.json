@@ -1,0 +1,31 @@
+{
+  "title": "Sunny day",
+  "year": 2023,
+  "order": 33,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/sunny-day/01.jpg",
+      "alt": "Sunny day — Arne Nys",
+      "width": 2048,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/sunny-day/02.jpg",
+      "alt": "Sunny day — Arne Nys",
+      "width": 1365,
+      "height": 1365,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "sunnyday"
+}

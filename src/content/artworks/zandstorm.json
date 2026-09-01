@@ -1,0 +1,21 @@
+{
+  "title": "Zandstorm",
+  "year": 2024,
+  "order": 32,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/zandstorm/01.jpg",
+      "alt": "Zandstorm — Arne Nys",
+      "width": 3024,
+      "height": 4032,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "zandstorm"
+}

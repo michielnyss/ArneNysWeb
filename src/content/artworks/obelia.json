@@ -1,0 +1,31 @@
+{
+  "title": "Obelia",
+  "year": 2024,
+  "order": 18,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/obelia/01.jpg",
+      "alt": "Obelia — Arne Nys",
+      "width": 2499,
+      "height": 2499,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/obelia/02.jpg",
+      "alt": "Obelia — Arne Nys",
+      "width": 2362,
+      "height": 2953,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "obelia"
+}

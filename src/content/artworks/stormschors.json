@@ -1,0 +1,21 @@
+{
+  "title": "Stormschors",
+  "year": 2023,
+  "order": 16,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/stormschors/01.jpg",
+      "alt": "Stormschors — Arne Nys",
+      "width": 1945,
+      "height": 1556,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "stormschors"
+}

@@ -1,0 +1,31 @@
+{
+  "title": "When the glow unfolds",
+  "year": 2023,
+  "order": 20,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/when-the-glow-unfolds/01.jpg",
+      "alt": "When the glow unfolds — Arne Nys",
+      "width": 1360,
+      "height": 1360,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/when-the-glow-unfolds/02.jpg",
+      "alt": "When the glow unfolds — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "when-the-glow-unfolds"
+}

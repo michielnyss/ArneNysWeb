@@ -1,0 +1,99 @@
+@import '@fontsource/libre-baskerville/400.css';
+@import '@fontsource/libre-baskerville/400-italic.css';
+@import '@fontsource/almarai/300.css';
+@import '@fontsource/almarai/400.css';
+@import '@fontsource/almarai/700.css';
+
+:root {
+  /* Sampled from the live site. */
+  --cream: #f1eeec;
+  --sage: #a7a489;
+  --dark-olive: #504b38;
+  --ink: #191713;
+  --navy: #02052d;
+
+  --serif: 'Libre Baskerville', 'Times New Roman', serif;
+  --sans: 'Almarai', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --measure: 1400px;
+  --gutter: clamp(1rem, 4vw, 3.25rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.14;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.wrap {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Visible only to screen readers, and to keyboard users when focused. */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0.6rem 1rem;
+  transition: top 0.15s;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

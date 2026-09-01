@@ -1,0 +1,41 @@
+{
+  "title": "Homarium",
+  "year": 2024,
+  "order": 10,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/homarium/01.jpg",
+      "alt": "Homarium — Arne Nys",
+      "width": 4284,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/homarium/02.jpg",
+      "alt": "Homarium — Arne Nys",
+      "width": 4284,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/homarium/03.jpg",
+      "alt": "Homarium — Arne Nys",
+      "width": 4284,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "homarium"
+}

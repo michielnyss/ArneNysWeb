@@ -1,0 +1,31 @@
+{
+  "title": "Shit, isn't it",
+  "year": 2023,
+  "order": 21,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/shit-isnt-it/01.jpg",
+      "alt": "Shit, isn't it — Arne Nys",
+      "width": 5850,
+      "height": 3900,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/shit-isnt-it/02.jpg",
+      "alt": "Shit, isn't it — Arne Nys",
+      "width": 2048,
+      "height": 1360,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "shit-isnt-it"
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Have a look",
+  "year": 2023,
+  "order": 28,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/have-a-look/01.jpg",
+      "alt": "Have a look — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/have-a-look/02.jpg",
+      "alt": "Have a look — Arne Nys",
+      "width": 1473,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/have-a-look/03.jpg",
+      "alt": "Have a look — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "havealook"
+}

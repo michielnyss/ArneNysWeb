@@ -1,0 +1,24 @@
+{
+  "name": "arnenysweb",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node tools/sync-cms.mjs && astro build",
+    "preview": "astro preview",
+    "login": "node tools/login.mjs",
+    "crawl": "node tools/crawl.mjs",
+    "content": "node tools/build-content.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource/almarai": "^5.3.0",
+    "@fontsource/libre-baskerville": "^5.3.0",
+    "@sveltia/cms": "^0.204.0",
+    "astro": "^5.18.2",
+    "sharp": "^0.35.4"
+  }
+}

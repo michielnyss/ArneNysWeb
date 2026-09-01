@@ -1,0 +1,41 @@
+{
+  "title": "Blue Echo",
+  "year": 2025,
+  "order": 19,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/blue-echo/01.jpg",
+      "alt": "Blue Echo — Arne Nys",
+      "width": 2500,
+      "height": 2500,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/blue-echo/02.jpg",
+      "alt": "Blue Echo — Arne Nys",
+      "width": 3213,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/blue-echo/03.jpg",
+      "alt": "Blue Echo — Arne Nys",
+      "width": 3213,
+      "height": 5712,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "blue-echo"
+}

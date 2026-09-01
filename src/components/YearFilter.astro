@@ -1,0 +1,45 @@
+---
+interface Props {
+  years: number[];
+  /** The active year, or null on the "all artworks" view. */
+  active?: number | null;
+}
+const { years, active = null } = Astro.props;
+---
+
+<nav class="years" aria-label="Filter by year">
+  {
+    years.map((year, i) => (
+      <>
+        {i > 0 && <span aria-hidden="true">|</span>}
+        <a href={`/artworks/${year}/`} aria-current={active === year ? 'page' : undefined}>
+          {year}
+        </a>
+      </>
+    ))
+  }
+</nav>
+
+<style>
+  .years {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    padding-block: clamp(2rem, 6vh, 4.5rem);
+  }
+  .years a {
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+  .years a:hover,
+  .years a[aria-current='page'] {
+    border-bottom-color: currentColor;
+  }
+  .years span {
+    opacity: 0.4;
+  }
+</style>

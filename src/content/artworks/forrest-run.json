@@ -1,0 +1,41 @@
+{
+  "title": "Forrest run",
+  "year": 2025,
+  "order": 5,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/forrest-run/01.jpg",
+      "alt": "Forrest run — Arne Nys",
+      "width": 1536,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/forrest-run/02.jpg",
+      "alt": "Forrest run — Arne Nys",
+      "width": 1536,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/forrest-run/03.jpg",
+      "alt": "Forrest run — Arne Nys",
+      "width": 1536,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "forrest-run"
+}

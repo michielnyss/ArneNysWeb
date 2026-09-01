@@ -1,0 +1,21 @@
+{
+  "title": "Schuurmachine",
+  "year": 2024,
+  "order": 23,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/schuurmachine/01.jpg",
+      "alt": "Schuurmachine — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "schuurmachine"
+}

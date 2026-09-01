@@ -1,0 +1,41 @@
+{
+  "title": "Tentakilus",
+  "year": 2024,
+  "order": 24,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/tentakilus/01.jpg",
+      "alt": "Tentakilus — Arne Nys",
+      "width": 1666,
+      "height": 1666,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tentakilus/02.jpg",
+      "alt": "Tentakilus — Arne Nys",
+      "width": 1360,
+      "height": 1360,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tentakilus/03.jpg",
+      "alt": "Tentakilus — Arne Nys",
+      "width": 1638,
+      "height": 1638,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "tentakilus"
+}

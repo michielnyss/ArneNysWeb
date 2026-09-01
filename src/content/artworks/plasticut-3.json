@@ -1,0 +1,21 @@
+{
+  "title": "Plasticut 3",
+  "year": 2025,
+  "order": 13,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/plasticut-3/01.jpg",
+      "alt": "Plasticut 3 — Arne Nys",
+      "width": 4366,
+      "height": 5828,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "plasticut"
+}

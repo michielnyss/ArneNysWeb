@@ -1,0 +1,51 @@
+{
+  "title": "Untitled II",
+  "year": 2026,
+  "order": 15,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/untitled-ii/01.jpg",
+      "alt": "Untitled II — Arne Nys",
+      "width": 1152,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/untitled-ii/02.jpg",
+      "alt": "Untitled II — Arne Nys",
+      "width": 1152,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5099999904632568,
+        "y": 0.5199999809265137
+      }
+    },
+    {
+      "src": "../../assets/artworks/untitled-ii/03.jpg",
+      "alt": "Untitled II — Arne Nys",
+      "width": 1536,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/untitled-ii/04.jpg",
+      "alt": "Untitled II — Arne Nys",
+      "width": 1536,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "e7oab086474gxxjaokz0lwvl9lyhqq"
+}

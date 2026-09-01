@@ -1,0 +1,31 @@
+{
+  "title": "Frisse duik in zomerweer",
+  "year": 2022,
+  "order": 34,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/frisse-duik-in-zomerweer/01.jpg",
+      "alt": "Frisse duik in zomerweer — Arne Nys",
+      "width": 2048,
+      "height": 1990,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/frisse-duik-in-zomerweer/02.jpg",
+      "alt": "Frisse duik in zomerweer — Arne Nys",
+      "width": 2048,
+      "height": 1546,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "frisseduikinzomerweer"
+}

@@ -1,0 +1,61 @@
+{
+  "title": "Tweestroom full",
+  "year": 2024,
+  "order": 2,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/tweestroom-full/01.jpg",
+      "alt": "Tweestroom full — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tweestroom-full/02.jpg",
+      "alt": "Tweestroom full — Arne Nys",
+      "width": 2048,
+      "height": 1360,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tweestroom-full/03.jpg",
+      "alt": "Tweestroom full — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tweestroom-full/04.jpg",
+      "alt": "Tweestroom full — Arne Nys",
+      "width": 1360,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/tweestroom-full/05.jpg",
+      "alt": "Tweestroom full — Arne Nys",
+      "width": 5809,
+      "height": 3501,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "tweestroomb-canys"
+}

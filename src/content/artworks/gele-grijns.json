@@ -1,0 +1,21 @@
+{
+  "title": "Gele grijns",
+  "year": 2022,
+  "order": 7,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/gele-grijns/01.jpg",
+      "alt": "Gele grijns — Arne Nys",
+      "width": 1799,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "gele-grijns"
+}

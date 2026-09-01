@@ -1,0 +1,31 @@
+{
+  "title": "Fragment 10 Surface",
+  "year": 2024,
+  "order": 25,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/fragment-10-surface/01.jpg",
+      "alt": "Fragment 10 Surface — Arne Nys",
+      "width": 1370,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/fragment-10-surface/02.jpg",
+      "alt": "Fragment 10 Surface — Arne Nys",
+      "width": 1567,
+      "height": 2048,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "surface"
+}

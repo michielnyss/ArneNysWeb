@@ -1,0 +1,169 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import villa from '../assets/site/dg-villa.jpg';
+import beech from '../assets/site/dg-beech-house.jpg';
+
+const gallery = await Promise.all(
+  Object.values(
+    import.meta.glob<{ default: ImageMetadata }>('../assets/domestic-gallery/*.{jpg,jpeg,png,webp}'),
+  ).map((load) => load().then((m) => m.default)),
+);
+
+const partners = [
+  {
+    name: 'Atelier Nys',
+    image: villa,
+    text: 'Atelier Nys creates unique artworks that seamlessly blend creativity and craftsmanship, enhancing personal spaces with unique, tailored designs.',
+  },
+  {
+    name: 'Beech House 1875',
+    image: beech,
+    text: 'A perfect mix of old world charm and contemporary details, Beech House 1875 is a versatile space that allows for complete creative freedom between its four walls and throughout its beautiful garden.',
+  },
+];
+---
+
+<Base
+  title="A Domestic Gallery — Atelier Nys"
+  description="Come and see a selection of our finest artworks in a beautiful home. You will be able to meet the artist and the stories behind these beautiful pieces."
+  theme="sage"
+>
+  <div class="wrap">
+    <header class="intro">
+      <h1>Come and explore our art in a domestic setting</h1>
+    </header>
+
+    <section class="event">
+      <h2>Atelier Nys x Beech House 1875</h2>
+      <p>
+        10–11 January, Beech House 1875 will soon offer The Domestic Gallery, a reimagined
+        approach to the traditional art exhibition by showcasing Nys’s works inside a historic
+        home. Creating an environment that is both thoughtfully curated and comfortably lived-in.
+        This unique setting invites visitors to experience art in a completely new unconventional
+        way.
+      </p>
+
+      <ul class="partners">
+        {
+          partners.map((partner) => (
+            <li>
+              <Image
+                src={partner.image}
+                alt={partner.name}
+                widths={[500, 800, 1100]}
+                sizes="(max-width: 800px) 100vw, 45vw"
+              />
+              <h3>{partner.name}</h3>
+              <p>{partner.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="visit">
+      <h2>Let us know when you are coming</h2>
+      <a class="cta" href="mailto:arne@ateliernys.com?subject=The%20Domestic%20Gallery">
+        arne@ateliernys.com
+      </a>
+    </section>
+
+    {
+      gallery.length > 0 && (
+        <section class="shots" aria-label="Photographs from the gallery">
+          <ul>
+            {gallery.map((img, i) => (
+              <li>
+                <Image
+                  src={img}
+                  alt=""
+                  widths={[400, 700, 1000]}
+                  sizes="(max-width: 700px) 50vw, 32vw"
+                  loading={i < 3 ? 'eager' : 'lazy'}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .intro {
+    padding-block: clamp(3rem, 12vh, 7rem) clamp(2rem, 6vh, 4rem);
+    max-width: 22ch;
+  }
+  .intro h1 {
+    color: var(--cream);
+    font-size: clamp(1.9rem, 4vw, 3.1rem);
+  }
+
+  .event h2,
+  .visit h2 {
+    color: var(--cream);
+    font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+    margin-bottom: 1.25rem;
+  }
+  .event > p {
+    max-width: 62ch;
+    margin: 0 0 clamp(2.5rem, 7vh, 4.5rem);
+  }
+
+  .partners {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+  .partners h3 {
+    color: var(--cream);
+    font-size: 1.05rem;
+    margin: 1rem 0 0.5rem;
+  }
+  .partners p {
+    margin: 0;
+    max-width: 42ch;
+  }
+
+  .visit {
+    padding-block: clamp(3rem, 10vh, 6rem) clamp(1.5rem, 4vh, 3rem);
+  }
+  .cta {
+    display: inline-block;
+    border: 1px solid currentColor;
+    padding: 0.7rem 1.6rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .cta:hover {
+    background: var(--cream);
+    color: var(--dark-olive);
+  }
+
+  .shots ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  }
+  .shots :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  @media (max-width: 800px) {
+    .partners,
+    .shots ul {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

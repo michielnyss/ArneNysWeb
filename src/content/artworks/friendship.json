@@ -1,0 +1,31 @@
+{
+  "title": "Friendship",
+  "year": 2022,
+  "order": 17,
+  "description": "",
+  "medium": "",
+  "dimensions": "",
+  "gallery": [
+    {
+      "src": "../../assets/artworks/friendship/01.jpg",
+      "alt": "Friendship — Arne Nys",
+      "width": 2362,
+      "height": 2953,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "src": "../../assets/artworks/friendship/02.jpg",
+      "alt": "Friendship — Arne Nys",
+      "width": 4928,
+      "height": 3280,
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "legacySlug": "friendship"
+}

@@ -1,0 +1,68 @@
+# Sveltia CMS — the /admin editor. Commits straight to the Git repo,
+# which triggers a rebuild and deploy.
+backend:
+  name: github
+  repo: OWNER/REPO # TODO: set to the GitHub owner/name once the repo is pushed
+  branch: main
+
+# Where uploaded images land, and how the site refers to them.
+media_folder: src/assets/artworks/_uploads
+public_folder: ../../assets/artworks/_uploads
+
+site_url: https://www.ateliernys.com
+display_url: https://www.ateliernys.com
+logo_url: /admin/logo.png
+
+collections:
+  - name: artworks
+    label: Artworks
+    label_singular: Artwork
+    folder: src/content/artworks
+    extension: json
+    format: json
+    create: true
+    slug: '{{slug}}'
+    identifier_field: title
+    summary: '{{title}} — {{year}}'
+    sortable_fields: [title, year, order]
+    view_groups:
+      - label: Year
+        field: year
+    fields:
+      - { name: title, label: Title, widget: string }
+      - name: year
+        label: Year
+        widget: number
+        value_type: int
+        min: 1990
+        max: 2100
+        required: false
+      - name: order
+        label: Sort order
+        widget: number
+        value_type: int
+        default: 0
+        hint: Lower numbers appear first within a year.
+      - name: description
+        label: Description
+        widget: text
+        required: false
+        hint: Shown next to the title on the artwork page.
+      - { name: medium, label: Medium, widget: string, required: false, hint: 'e.g. Plaster relief on panel' }
+      - { name: dimensions, label: Dimensions, widget: string, required: false, hint: 'e.g. 120 × 90 cm' }
+      - name: gallery
+        label: Images
+        label_singular: Image
+        widget: list
+        summary: '{{fields.alt}}'
+        hint: The first image is used as the cover in the grid.
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Alt text, widget: string, required: false, hint: Describes the image for screen readers. }
+          - { name: width, label: Width (px), widget: number, value_type: int, required: false }
+          - { name: height, label: Height (px), widget: number, value_type: int, required: false }
+      - name: legacySlug
+        label: Old Squarespace slug
+        widget: string
+        required: false
+        hint: Keeps the old URL redirecting here. Leave as-is.
