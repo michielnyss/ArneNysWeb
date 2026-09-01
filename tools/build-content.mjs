@@ -4,6 +4,7 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { ROOT } from './browser.mjs';
 
 const EX = path.join(ROOT, 'extracted');
@@ -132,11 +133,37 @@ for (const f of files.sort()) {
 
 await fs.writeFile(path.join(DATA, 'redirects.json'), JSON.stringify(redirects, null, 2) + '\n');
 
+/**
+ * The Domestic Gallery carousel renders each slide more than once, so copy its
+ * images deduplicated by content hash, in first-seen order.
+ */
+const DG = path.join(ROOT, 'src', 'assets', 'domestic-gallery');
+await fs.rm(DG, { recursive: true, force: true });
+await fs.mkdir(DG, { recursive: true });
+const dgPage = manifest.pages.find((p) => p.slug === 'a-domestic-gallery');
+const seenHash = new Set();
+let dgCount = 0;
+for (const section of dgPage?.sections ?? []) {
+  if (section.images.length < 3) continue;
+  for (const url of section.images) {
+    const match = dgPage.images.find((i) => i.original.split('?')[0] === url.split('?')[0]);
+    if (!match) continue;
+    const file = path.join(EX, match.file);
+    const hash = crypto.createHash('sha1').update(await fs.readFile(file)).digest('hex');
+    if (seenHash.has(hash)) continue;
+    seenHash.add(hash);
+    dgCount += 1;
+    const name = `${String(dgCount).padStart(2, '0')}${path.extname(match.file)}`;
+    await fs.copyFile(file, path.join(DG, name));
+  }
+}
+
 const byYear = {};
 for (const a of artworks) (byYear[a.year] ??= []).push(a.title);
 
 console.log(`${artworks.length} artworks -> src/content/artworks/`);
 console.log(`${artworks.reduce((n, a) => n + a.gallery.length, 0)} images -> src/assets/artworks/`);
+console.log(`${dgCount} domestic-gallery images -> src/assets/domestic-gallery/`);
 for (const y of Object.keys(byYear).sort()) console.log(`  ${y}: ${byYear[y].length}`);
 console.log(`\n${Object.keys(redirects).length} redirects -> src/data/redirects.json`);
 if (warnings.length) {
