@@ -9,6 +9,16 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "arnenysweb",
   "compatibility_date": "2026-08-31",
+
+  // Both hostnames serve the site. Deploying creates the DNS records and
+  // certificates, so the zone needs no hand-editing. `site` in
+  // astro.config.mjs is the www form, so that is the canonical one every page
+  // and the sitemap point at; the apex is bound too so it does not dead-end.
+  "routes": [
+    { "pattern": "www.arnenys.com", "custom_domain": true },
+    { "pattern": "arnenys.com", "custom_domain": true }
+  ],
+
   "assets": {
     "directory": "dist",
     // Astro builds with format: 'directory', so /foo must find /foo/index.html.
