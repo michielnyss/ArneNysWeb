@@ -15,8 +15,27 @@
   --serif: 'Libre Baskerville', 'Times New Roman', serif;
   --sans: 'Almarai', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --measure: 1400px;
-  --gutter: clamp(1rem, 4vw, 3.25rem);
+  /* Muted brown the live site uses for the year filter. */
+  --muted: #796960;
+
+  /*
+   * The live layout is full-bleed: a 1.5vw gutter at every width, with no
+   * max-width cap, widening to 6vw once the grid drops to one column.
+   */
+  --gutter: 1.5vw;
+  /* Column gap between grid tiles, and between plate and caption columns. */
+  --gap: 2vw;
+
+  /* Small caps-height UI text: nav, year filter, captions, footer. */
+  --ui: 0.75rem;
+  --ui-line: 1.5;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 6vw;
+    --gap: 4vw;
+  }
 }
 
 *,
@@ -34,9 +53,9 @@ body {
   background: var(--cream);
   color: var(--ink);
   font-family: var(--sans);
-  font-weight: 300;
-  font-size: 0.9375rem;
-  line-height: 1.75;
+  font-weight: 400;
+  font-size: var(--ui);
+  line-height: var(--ui-line);
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
 }
@@ -64,8 +83,6 @@ img {
 }
 
 .wrap {
-  max-width: var(--measure);
-  margin-inline: auto;
   padding-inline: var(--gutter);
 }
 

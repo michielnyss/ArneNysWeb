@@ -4,43 +4,36 @@
   "order": 9,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "180 × 105 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/de-grondslag/01.jpg",
+      "src": "/src/assets/artworks/de-grondslag/01.jpg",
       "alt": "De grondslag — Arne Nys",
-      "width": 1986,
-      "height": 2648,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/de-grondslag/02.jpg",
+      "src": "/src/assets/artworks/de-grondslag/02.jpg",
       "alt": "De grondslag — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/de-grondslag/03.jpg",
+      "src": "/src/assets/artworks/de-grondslag/03.jpg",
       "alt": "De grondslag — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/de-grondslag/04.jpg",
+      "src": "/src/assets/artworks/de-grondslag/04.jpg",
       "alt": "De grondslag — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

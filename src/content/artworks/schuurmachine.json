@@ -4,13 +4,12 @@
   "order": 23,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "62 × 45 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/schuurmachine/01.jpg",
+      "src": "/src/assets/artworks/schuurmachine/01.jpg",
       "alt": "Schuurmachine — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

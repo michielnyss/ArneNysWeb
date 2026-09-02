@@ -4,23 +4,20 @@
   "order": 21,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "30 × 36 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/shit-isnt-it/01.jpg",
+      "src": "/src/assets/artworks/shit-isnt-it/01.jpg",
       "alt": "Shit, isn't it — Arne Nys",
-      "width": 5850,
-      "height": 3900,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/shit-isnt-it/02.jpg",
+      "src": "/src/assets/artworks/shit-isnt-it/02.jpg",
       "alt": "Shit, isn't it — Arne Nys",
-      "width": 2048,
-      "height": 1360,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

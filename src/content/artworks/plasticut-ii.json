@@ -4,33 +4,28 @@
   "order": 1,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "60 × 55 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/plasticut-ii/01.jpg",
+      "src": "/src/assets/artworks/plasticut-ii/01.jpg",
       "alt": "Plasticut II — Arne Nys",
-      "width": 5769,
-      "height": 4327,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/plasticut-ii/02.jpg",
+      "src": "/src/assets/artworks/plasticut-ii/02.jpg",
       "alt": "Plasticut II — Arne Nys",
-      "width": 4284,
-      "height": 4284,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/plasticut-ii/03.jpg",
+      "src": "/src/assets/artworks/plasticut-ii/03.jpg",
       "alt": "Plasticut II — Arne Nys",
-      "width": 4284,
-      "height": 4284,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

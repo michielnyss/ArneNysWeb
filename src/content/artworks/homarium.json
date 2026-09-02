@@ -4,33 +4,28 @@
   "order": 10,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "85 × 105 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/homarium/01.jpg",
+      "src": "/src/assets/artworks/homarium/01.jpg",
       "alt": "Homarium — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/homarium/02.jpg",
+      "src": "/src/assets/artworks/homarium/02.jpg",
       "alt": "Homarium — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/homarium/03.jpg",
+      "src": "/src/assets/artworks/homarium/03.jpg",
       "alt": "Homarium — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

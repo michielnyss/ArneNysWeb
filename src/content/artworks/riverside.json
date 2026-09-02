@@ -4,23 +4,20 @@
   "order": 12,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "49 × 62 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/riverside/01.jpg",
+      "src": "/src/assets/artworks/riverside/01.jpg",
       "alt": "Riverside — Arne Nys",
-      "width": 6259,
-      "height": 4173,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/riverside/02.jpg",
+      "src": "/src/assets/artworks/riverside/02.jpg",
       "alt": "Riverside — Arne Nys",
-      "width": 6408,
-      "height": 4272,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

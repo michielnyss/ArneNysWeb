@@ -4,33 +4,28 @@
   "order": 8,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "90 × 80 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/posseidon/01.jpg",
+      "src": "/src/assets/artworks/posseidon/01.jpg",
       "alt": "Posseidon — Arne Nys",
-      "width": 4337,
-      "height": 5783,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/posseidon/02.jpg",
+      "src": "/src/assets/artworks/posseidon/02.jpg",
       "alt": "Posseidon — Arne Nys",
-      "width": 4469,
-      "height": 5274,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/posseidon/03.jpg",
+      "src": "/src/assets/artworks/posseidon/03.jpg",
       "alt": "Posseidon — Arne Nys",
-      "width": 4479,
-      "height": 5330,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

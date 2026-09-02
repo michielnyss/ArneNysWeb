@@ -4,33 +4,28 @@
   "order": 30,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "44 × 70 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/morning-light-grey/01.jpg",
+      "src": "/src/assets/artworks/morning-light-grey/01.jpg",
       "alt": "Morning Light - Grey — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/morning-light-grey/02.jpg",
+      "src": "/src/assets/artworks/morning-light-grey/02.jpg",
       "alt": "Morning Light - Grey — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/morning-light-grey/03.jpg",
+      "src": "/src/assets/artworks/morning-light-grey/03.jpg",
       "alt": "Morning Light - Grey — Arne Nys",
-      "width": 4825,
-      "height": 3217,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

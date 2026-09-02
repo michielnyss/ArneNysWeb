@@ -4,53 +4,44 @@
   "order": 2,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "155 × 160 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/tweestroom-full/01.jpg",
+      "src": "/src/assets/artworks/tweestroom-full/01.jpg",
       "alt": "Tweestroom full — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tweestroom-full/02.jpg",
+      "src": "/src/assets/artworks/tweestroom-full/02.jpg",
       "alt": "Tweestroom full — Arne Nys",
-      "width": 2048,
-      "height": 1360,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tweestroom-full/03.jpg",
+      "src": "/src/assets/artworks/tweestroom-full/03.jpg",
       "alt": "Tweestroom full — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tweestroom-full/04.jpg",
+      "src": "/src/assets/artworks/tweestroom-full/04.jpg",
       "alt": "Tweestroom full — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tweestroom-full/05.jpg",
+      "src": "/src/assets/artworks/tweestroom-full/05.jpg",
       "alt": "Tweestroom full — Arne Nys",
-      "width": 5809,
-      "height": 3501,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

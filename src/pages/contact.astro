@@ -11,56 +11,64 @@ const bio = [
 ---
 
 <Base
-  title="Contact — Arne Nys"
+  title="Contact"
   description="Arne Nys (b. 1998) is a Belgian artist living and working in Lichtaart."
   theme="sage"
 >
-  <div class="wrap contact">
+  <div class="contact">
+    <Image
+      class="portrait"
+      src={portrait}
+      alt="Arne Nys in the studio"
+      widths={[600, 900, 1200]}
+      sizes="(max-width: 767px) 88vw, 38vw"
+    />
+
     <div class="bio">
       {bio.map((para) => <h3>{para}</h3>)}
-    </div>
-
-    <div class="side">
-      <Image
-        src={portrait}
-        alt="Arne Nys in the studio"
-        widths={[600, 900, 1200]}
-        sizes="(max-width: 900px) 100vw, 40vw"
-      />
     </div>
   </div>
 </Base>
 
 <style>
+  /*
+   * The live page is one centred column: the portrait on top, the text below
+   * it in a slightly wider measure.
+   */
   .contact {
+    padding-inline: var(--gutter);
+    padding-top: 129px;
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(260px, 1fr);
-    gap: clamp(2rem, 6vw, 5rem);
-    align-items: start;
-    padding-block: clamp(2.5rem, 9vh, 6rem);
+    justify-items: center;
+    gap: 53px;
+  }
+
+  .contact :global(.portrait) {
+    width: 100%;
+    max-width: 545px;
+    height: auto;
   }
 
   .bio {
+    width: 100%;
+    max-width: 693px;
     display: grid;
-    gap: clamp(1.5rem, 3.5vh, 2.5rem);
+    gap: 24px;
   }
   /* The live site sets these paragraphs as headings, at heading size. */
   .bio h3 {
     color: var(--cream);
-    font-size: clamp(1.05rem, 1.55vw, 1.4rem);
-    line-height: 1.42;
-    letter-spacing: -0.012em;
-    max-width: 46ch;
+    font-family: var(--serif);
+    font-size: clamp(1.05rem, 1.553vw, 1.7rem);
+    line-height: 1.171;
+    letter-spacing: -0.02em;
+    font-weight: 400;
   }
 
-  .side {
-    display: grid;
-    gap: 1.5rem;
-  }
-
-  @media (max-width: 900px) {
+  @media (max-width: 767px) {
     .contact {
-      grid-template-columns: 1fr;
+      padding-top: clamp(2rem, 9vh, 4rem);
+      gap: clamp(2rem, 5vh, 3.5rem);
     }
   }
 </style>

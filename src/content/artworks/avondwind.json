@@ -4,33 +4,28 @@
   "order": 29,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "85 × 65 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/avondwind/01.jpg",
+      "src": "/src/assets/artworks/avondwind/01.jpg",
       "alt": "Avondwind — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/avondwind/02.jpg",
+      "src": "/src/assets/artworks/avondwind/02.jpg",
       "alt": "Avondwind — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/avondwind/03.jpg",
+      "src": "/src/assets/artworks/avondwind/03.jpg",
       "alt": "Avondwind — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

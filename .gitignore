@@ -8,3 +8,10 @@ secrets.local.json
 # Raw Squarespace scrape (~260MB). Regenerate with `npm run crawl`.
 # src/content and src/assets are generated FROM this and are committed.
 extracted/
+
+# Claude Code
+.claude/
+.claude.json
+.claude.json.backup
+CLAUDE.md
+CLAUDE.local.md

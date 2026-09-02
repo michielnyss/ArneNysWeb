@@ -4,23 +4,20 @@
   "order": 11,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "35 × 38 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/fragment-17-pos/01.jpg",
+      "src": "/src/assets/artworks/fragment-17-pos/01.jpg",
       "alt": "Fragment 17 pos — Arne Nys",
-      "width": 3254,
-      "height": 4339,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/fragment-17-pos/02.jpg",
+      "src": "/src/assets/artworks/fragment-17-pos/02.jpg",
       "alt": "Fragment 17 pos — Arne Nys",
-      "width": 5127,
-      "height": 4480,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

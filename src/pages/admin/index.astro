@@ -1,0 +1,44 @@
+---
+/**
+ * The /admin editor shell. This is an Astro route rather than a plain file in
+ * public/, because the dev server resolves public/ subfolders only by exact
+ * filename — /admin/ would fall through to the 404 page. The CMS bundle and
+ * its config stay in public/admin/ and are loaded by absolute path.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
+    <title>Atelier Nys — Editor</title>
+    <!--
+      Leaves Artworks as the only section in the editor. Photos belong to a
+      work and are added from inside it, so the asset library — a file browser
+      offering the same images again as "All assets" and "Global assets" — is
+      only one more thing to wonder about.
+
+      It has to go here: Sveltia has no setting for it. The tab appears
+      whenever any media folder is configured (public/admin/config.yml has
+      two, the global one and the per-work one), and dropping either would
+      break uploads rather than hide the tab.
+
+      Matched on the shortcut and not the label, because the label follows the
+      browser's language while Alt+2 is the asset library in every locale — it
+      is the only Alt+2 in the bundle. `is:inline` keeps Astro from scoping the
+      rule to this file's own markup, which is empty: the CMS builds its
+      interface at runtime.
+    -->
+    <style is:inline>
+      [aria-keyshortcuts='Alt+2'] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <script is:inline src="/admin/sveltia-cms.js" type="module"></script>
+  </body>
+</html>

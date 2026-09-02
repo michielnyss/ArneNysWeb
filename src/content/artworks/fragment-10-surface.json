@@ -4,23 +4,20 @@
   "order": 25,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "37 × 39 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/fragment-10-surface/01.jpg",
+      "src": "/src/assets/artworks/fragment-10-surface/01.jpg",
       "alt": "Fragment 10 Surface — Arne Nys",
-      "width": 1370,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/fragment-10-surface/02.jpg",
+      "src": "/src/assets/artworks/fragment-10-surface/02.jpg",
       "alt": "Fragment 10 Surface — Arne Nys",
-      "width": 1567,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

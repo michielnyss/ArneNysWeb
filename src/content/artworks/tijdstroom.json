@@ -5,52 +5,43 @@
   "description": "",
   "medium": "",
   "dimensions": "",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/tijdstroom/01.webp",
+      "src": "/src/assets/artworks/tijdstroom/01.webp",
       "alt": "Tijdstroom — Arne Nys",
-      "width": 2048,
-      "height": 1365,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tijdstroom/02.jpg",
+      "src": "/src/assets/artworks/tijdstroom/02.jpg",
       "alt": "Tijdstroom — Arne Nys",
-      "width": 2048,
-      "height": 1365,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tijdstroom/03.jpg",
+      "src": "/src/assets/artworks/tijdstroom/03.jpg",
       "alt": "Tijdstroom — Arne Nys",
-      "width": 1365,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tijdstroom/04.jpg",
+      "src": "/src/assets/artworks/tijdstroom/04.jpg",
       "alt": "Tijdstroom — Arne Nys",
-      "width": 2048,
-      "height": 1365,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/tijdstroom/05.jpg",
+      "src": "/src/assets/artworks/tijdstroom/05.jpg",
       "alt": "Tijdstroom — Arne Nys",
-      "width": 1468,
-      "height": 826,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

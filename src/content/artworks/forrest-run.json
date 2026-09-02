@@ -4,33 +4,28 @@
   "order": 5,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "12 × 24 × 3 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/forrest-run/01.jpg",
+      "src": "/src/assets/artworks/forrest-run/01.jpg",
       "alt": "Forrest run — Arne Nys",
-      "width": 1536,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/forrest-run/02.jpg",
+      "src": "/src/assets/artworks/forrest-run/02.jpg",
       "alt": "Forrest run — Arne Nys",
-      "width": 1536,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/forrest-run/03.jpg",
+      "src": "/src/assets/artworks/forrest-run/03.jpg",
       "alt": "Forrest run — Arne Nys",
-      "width": 1536,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

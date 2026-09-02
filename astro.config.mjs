@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import redirects from './src/data/redirects.json' with { type: 'json' };
 
 export default defineConfig({
-  site: 'https://www.ateliernys.com',
+  site: 'https://www.arnenys.com',
   // Old Squarespace product URLs (/artworks/p/<slug>) keep working.
   redirects: { ...redirects, '/home': '/', '/artworks': '/' },
   build: { format: 'directory' },

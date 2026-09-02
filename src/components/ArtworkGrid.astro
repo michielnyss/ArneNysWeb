@@ -20,8 +20,8 @@ const { artworks } = Astro.props;
                 <Image
                   src={cover.src}
                   alt={cover.alt || work.data.title}
-                  widths={[320, 480, 720, 960]}
-                  sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 23vw"
+                  widths={[320, 480, 720, 960, 1200]}
+                  sizes="(max-width: 767px) 88vw, 23vw"
                   style={
                     cover.focalPoint
                       ? `object-position:${cover.focalPoint.x * 100}% ${cover.focalPoint.y * 100}%`
@@ -46,11 +46,12 @@ const { artworks } = Astro.props;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: clamp(1rem, 2.4vw, 2.25rem) clamp(0.75rem, 1.6vw, 1.5rem);
+    gap: var(--gap);
   }
 
+  /* The live thumbnails are a 2:3 portrait crop at every viewport width. */
   .frame {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 2 / 3;
     overflow: hidden;
     background: color-mix(in srgb, currentColor 6%, transparent);
   }
@@ -64,25 +65,24 @@ const { artworks } = Astro.props;
     transform: scale(1.02);
   }
 
+  /* Captions are set in the serif, not the UI sans. */
   .caption {
     display: block;
-    margin-top: 0.7rem;
-    font-size: 0.8125rem;
-    letter-spacing: 0.01em;
-    color: var(--ink);
+    margin-top: 1.375rem;
+    font-family: var(--serif);
+    font-size: 0.858rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #000;
   }
   :global(body[data-theme='sage']) .caption {
     color: var(--cream);
   }
 
-  @media (max-width: 1000px) {
+  /* The live grid goes straight from four columns to one below 768px. */
+  @media (max-width: 767px) {
     .grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  @media (max-width: 600px) {
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr;
     }
   }
 </style>

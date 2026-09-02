@@ -1,56 +1,20 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
 import ArtworkGrid from '../components/ArtworkGrid.astro';
 import YearFilter from '../components/YearFilter.astro';
-import hero from '../assets/site/hero-home.png';
 import { sortArtworks, yearsOf } from '../lib/artworks';
 
 const artworks = sortArtworks(await getCollection('artworks'));
 const years = yearsOf(artworks);
 ---
 
-<Base title="Arne Nys" headerOverlay>
-  <section class="hero">
-    <Image
-      src={hero}
-      alt=""
-      widths={[900, 1440, 2000]}
-      sizes="100vw"
-      loading="eager"
-      fetchpriority="high"
-    />
-    <h1>Arne Nys</h1>
-  </section>
+<Base title="Arne Nys" bareTitle headerOverlay>
+  <Hero />
 
   <div class="wrap">
     <YearFilter years={years} active={null} />
     <ArtworkGrid artworks={artworks} />
   </div>
 </Base>
-
-<style>
-  .hero {
-    position: relative;
-    /* Matches the live site: header sits above, title centred over the image. */
-    height: clamp(360px, 52vh, 620px);
-    overflow: hidden;
-    margin-top: -1px;
-  }
-  .hero :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .hero h1 {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    margin: 0;
-    color: var(--cream);
-    font-size: clamp(2rem, 4.6vw, 2.9rem);
-    text-shadow: 0 1px 24px rgb(0 0 0 / 22%);
-  }
-</style>

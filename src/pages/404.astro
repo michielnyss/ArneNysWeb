@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="That page does not exist." theme="sage">
+  <div class="wrap missing">
+    <h1>Page not found</h1>
+    <p>That page has moved or never existed.</p>
+    <a href="/">Back to the artworks</a>
+  </div>
+</Base>
+
+<style>
+  .missing {
+    padding-top: clamp(4rem, 18vh, 12rem);
+    padding-bottom: clamp(3rem, 12vh, 8rem);
+    text-align: center;
+  }
+  .missing h1 {
+    color: var(--cream);
+    font-size: clamp(1.6rem, 3.233vw, 3.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .missing p {
+    margin: 22px 0 2rem;
+    color: var(--cream);
+  }
+  .missing a {
+    border-bottom: 1px solid currentColor;
+  }
+</style>

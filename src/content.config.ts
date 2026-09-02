@@ -11,13 +11,13 @@ const artworks = defineCollection({
       description: z.string().default(''),
       medium: z.string().default(''),
       dimensions: z.string().default(''),
+      /** Free text shown under the year, e.g. "Sold". */
+      status: z.string().default(''),
       gallery: z
         .array(
           z.object({
             src: image(),
             alt: z.string().default(''),
-            width: z.number().optional(),
-            height: z.number().optional(),
             focalPoint: z.object({ x: z.number(), y: z.number() }).optional(),
           }),
         )

@@ -4,13 +4,12 @@
   "order": 32,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "50 × 65 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/zandstorm/01.jpg",
+      "src": "/src/assets/artworks/zandstorm/01.jpg",
       "alt": "Zandstorm — Arne Nys",
-      "width": 3024,
-      "height": 4032,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

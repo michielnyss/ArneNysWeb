@@ -4,23 +4,20 @@
   "order": 33,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "53 × 33 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/sunny-day/01.jpg",
+      "src": "/src/assets/artworks/sunny-day/01.jpg",
       "alt": "Sunny day — Arne Nys",
-      "width": 2048,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/sunny-day/02.jpg",
+      "src": "/src/assets/artworks/sunny-day/02.jpg",
       "alt": "Sunny day — Arne Nys",
-      "width": 1365,
-      "height": 1365,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

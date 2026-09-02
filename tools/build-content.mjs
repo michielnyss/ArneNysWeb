@@ -4,7 +4,6 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { ROOT } from './browser.mjs';
 
 const EX = path.join(ROOT, 'extracted');
@@ -21,11 +20,58 @@ const YEARS = {
   '698e31bfea7b683116d520fe': 2026,
 };
 
-/** Titles the artist never filled in; keyed by the auto-generated Squarespace slug. */
-const TITLE_FIXES = {
-  bjb366ne34709r4jj55mezzid34azi: 'Untitled I',
-  e7oab086474gxxjaokz0lwvl9lyhqq: 'Untitled II',
-};
+/**
+ * Works left off the new site, by their Squarespace slug: the two that were
+ * never titled, and the duplicate "Fragment 7". Their old URLs redirect to the
+ * index rather than 404, since the live site still links to them.
+ */
+const OMIT = new Set([
+  'bjb366ne34709r4jj55mezzid34azi', // untitled, 2026
+  'e7oab086474gxxjaokz0lwvl9lyhqq', // untitled, 2026
+  'fragment4-7sjw9', // second work also called "Fragment 7"
+]);
+
+/** Squarespace keeps the caption block as HTML; one <p> per line. */
+const excerptLines = (html) =>
+  (html || '')
+    .replace(/<[^>]+>/g, '\n')
+    .replace(/&times;/g, '×')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+const isYear = (s) => /^(19|20)\d\d$/.test(s);
+const isStatus = (s) => /^(sold|verkocht|reserved|gereserveerd)$/i.test(s);
+const isDimensions = (s) => /\d/.test(s) && /(\bcm\b|\bmm\b|\bm\b|[x×])/i.test(s);
+
+/** "60 x 55> x 30 cm" -> "60 × 55 × 30 cm"; "60x55cm" -> "60 × 55 cm". */
+const tidyDimensions = (s) =>
+  s
+    .replace(/[>‹›<]/g, ' ')
+    .replace(/\s*[x×]\s*/gi, ' × ')
+    .replace(/(\d)\s*(cm|mm|m)\b/gi, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/**
+ * The caption block carries dimensions, material and sometimes a status, in no
+ * fixed order. The year is dropped here because it already comes from the
+ * work's Squarespace category.
+ */
+function parseExcerpt(html) {
+  const out = { dimensions: '', medium: '', status: '' };
+  for (const line of excerptLines(html)) {
+    if (isYear(line)) continue;
+    if (isStatus(line)) out.status ||= line.replace(/^./, (c) => c.toUpperCase());
+    else if (isDimensions(line)) out.dimensions ||= tidyDimensions(line);
+    else out.medium ||= line;
+  }
+  return out;
+}
 
 const slugify = (s) => s.toLowerCase()
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -61,7 +107,6 @@ const fullRes = (src) => {
 };
 
 await fs.rm(CONTENT, { recursive: true, force: true });
-await fs.rm(ASSETS, { recursive: true, force: true });
 await fs.mkdir(CONTENT, { recursive: true });
 await fs.mkdir(ASSETS, { recursive: true });
 await fs.mkdir(DATA, { recursive: true });
@@ -71,6 +116,7 @@ const used = new Map();
 const artworks = [];
 const redirects = {};
 const warnings = [];
+const omitted = [];
 
 for (const f of files.sort()) {
   const raw = JSON.parse(await fs.readFile(path.join(EX, 'json', f), 'utf8'));
@@ -78,8 +124,14 @@ for (const f of files.sort()) {
   if (!item) { warnings.push(`${f}: no item payload`); continue; }
 
   const oldSlug = item.urlId;
-  const title = (item.title || '').trim() || TITLE_FIXES[oldSlug] || 'Untitled';
-  if (!(item.title || '').trim()) warnings.push(`untitled on Squarespace -> "${title}" (was /${oldSlug})`);
+  if (OMIT.has(oldSlug)) {
+    omitted.push(item.title?.trim() || `(untitled) /${oldSlug}`);
+    redirects[`/artworks/p/${oldSlug}`] = '/';
+    continue;
+  }
+
+  const title = (item.title || '').trim();
+  if (!title) { warnings.push(`still untitled, not in OMIT: /${oldSlug}`); continue; }
 
   let slug = slugify(title);
   if (used.has(slug)) {
@@ -94,35 +146,56 @@ for (const f of files.sort()) {
   const year = YEARS[(item.categoryIds ?? [])[0]] ?? null;
   if (!year) warnings.push(`${title}: no year category`);
 
-  // Gallery order comes from Squarespace's own item list.
+  /**
+   * Gallery order comes from Squarespace's own item list, except that the
+   * item's own cover (item.assetUrl) leads — that is the image the live grid
+   * shows, and for five works it is not the first one in the list.
+   */
+  const subs = (item.items ?? []).filter((s) => s.assetUrl);
+  const coverId = (item.assetUrl || '').split('?')[0];
+  const coverAt = coverId ? subs.findIndex((s) => s.assetUrl.split('?')[0] === coverId) : -1;
+  if (coverAt > 0) subs.unshift(...subs.splice(coverAt, 1));
+
   const gallery = [];
+  // Replace only this work's folder. Anything else under src/assets/artworks —
+  // photos added through /admin, say — is left where it is.
   const dir = path.join(ASSETS, slug);
+  await fs.rm(dir, { recursive: true, force: true });
   await fs.mkdir(dir, { recursive: true });
-  for (const [n, sub] of (item.items ?? []).entries()) {
-    if (!sub.assetUrl) continue;
+  for (const [n, sub] of subs.entries()) {
     const local = byUrl.get(fullRes(sub.assetUrl));
     if (!local) { warnings.push(`${title}: image not downloaded (${sub.filename})`); continue; }
     const ext = path.extname(local) || '.jpg';
     const name = `${String(n + 1).padStart(2, '0')}${ext}`;
     await fs.copyFile(path.join(EX, 'images', local), path.join(dir, name));
-    const [w, h] = (sub.originalSize || '').split('x').map(Number);
+    /*
+     * Paths are absolute from the repo root, not relative to this JSON file.
+     * Astro's image() handles both, but Sveltia can only resolve an absolute
+     * one — a relative "../../" path shows as a bare filename in /admin with
+     * no thumbnail.
+     *
+     * No width/height: Astro reads the real dimensions off the file itself.
+     */
     gallery.push({
-      src: `../../assets/artworks/${slug}/${name}`,
+      src: `/src/assets/artworks/${slug}/${name}`,
       alt: `${title} — Arne Nys`,
-      ...(w && h ? { width: w, height: h } : {}),
       focalPoint: sub.mediaFocalPoint ? { x: sub.mediaFocalPoint.x, y: sub.mediaFocalPoint.y } : undefined,
     });
   }
   if (!gallery.length) warnings.push(`${title}: no images`);
 
+  // Dimensions / material / status live in the caption block under the title.
+  const { dimensions, medium, status } = parseExcerpt(item.excerpt);
+  if (!dimensions && !medium && !status) warnings.push(`${title}: empty caption block`);
+
   const entry = {
     title,
     year,
     order: gridOrder.get(oldSlug) ?? 999,
-    // Empty on Squarespace; these exist so they can be filled in via /admin.
     description: '',
-    medium: '',
-    dimensions: '',
+    medium,
+    dimensions,
+    status,
     gallery,
     legacySlug: oldSlug,
   };
@@ -131,39 +204,16 @@ for (const f of files.sort()) {
   await fs.writeFile(path.join(CONTENT, `${slug}.json`), JSON.stringify(entry, null, 2) + '\n');
 }
 
-await fs.writeFile(path.join(DATA, 'redirects.json'), JSON.stringify(redirects, null, 2) + '\n');
+// The Domestic Gallery was a one-off event page; it is not carried over.
+redirects['/a-domestic-gallery'] = '/';
 
-/**
- * The Domestic Gallery carousel renders each slide more than once, so copy its
- * images deduplicated by content hash, in first-seen order.
- */
-const DG = path.join(ROOT, 'src', 'assets', 'domestic-gallery');
-await fs.rm(DG, { recursive: true, force: true });
-await fs.mkdir(DG, { recursive: true });
-const dgPage = manifest.pages.find((p) => p.slug === 'a-domestic-gallery');
-const seenHash = new Set();
-let dgCount = 0;
-for (const section of dgPage?.sections ?? []) {
-  if (section.images.length < 3) continue;
-  for (const url of section.images) {
-    const match = dgPage.images.find((i) => i.original.split('?')[0] === url.split('?')[0]);
-    if (!match) continue;
-    const file = path.join(EX, match.file);
-    const hash = crypto.createHash('sha1').update(await fs.readFile(file)).digest('hex');
-    if (seenHash.has(hash)) continue;
-    seenHash.add(hash);
-    dgCount += 1;
-    const name = `${String(dgCount).padStart(2, '0')}${path.extname(match.file)}`;
-    await fs.copyFile(file, path.join(DG, name));
-  }
-}
+await fs.writeFile(path.join(DATA, 'redirects.json'), JSON.stringify(redirects, null, 2) + '\n');
 
 const byYear = {};
 for (const a of artworks) (byYear[a.year] ??= []).push(a.title);
 
 console.log(`${artworks.length} artworks -> src/content/artworks/`);
 console.log(`${artworks.reduce((n, a) => n + a.gallery.length, 0)} images -> src/assets/artworks/`);
-console.log(`${dgCount} domestic-gallery images -> src/assets/domestic-gallery/`);
 for (const y of Object.keys(byYear).sort()) console.log(`  ${y}: ${byYear[y].length}`);
 console.log(`\n${Object.keys(redirects).length} redirects -> src/data/redirects.json`);
 if (warnings.length) {

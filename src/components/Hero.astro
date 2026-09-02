@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import hero from '../assets/site/hero-home.png';
+---
+
+<section class="hero">
+  <Image
+    src={hero}
+    alt=""
+    widths={[900, 1440, 2000]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <h1>Arne Nys</h1>
+</section>
+
+<style>
+  /*
+   * Height, crop and title position are measured off the live banner:
+   * 536px tall at 1440x900, growing with both axes.
+   */
+  .hero {
+    position: relative;
+    height: clamp(320px, calc(24vw + 21vh), 720px);
+    overflow: hidden;
+  }
+  .hero :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 48.8% 10.4%;
+  }
+  .hero h1 {
+    position: absolute;
+    top: 54.9%;
+    inset-inline: 0;
+    margin: 0;
+    text-align: center;
+    color: var(--cream);
+    font-size: clamp(1.9rem, 3.113vw, 4rem);
+    line-height: 1.109;
+    letter-spacing: -0.02em;
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      height: clamp(360px, calc(12vw + 60vh), 640px);
+    }
+  }
+</style>

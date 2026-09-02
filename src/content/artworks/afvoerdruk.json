@@ -3,54 +3,45 @@
   "year": 2026,
   "order": 0,
   "description": "",
-  "medium": "",
-  "dimensions": "",
+  "medium": "Aluminium",
+  "dimensions": "39 × 55 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/afvoerdruk/01.jpg",
+      "src": "/src/assets/artworks/afvoerdruk/01.jpg",
       "alt": "Afvoerdruk — Arne Nys",
-      "width": 1541,
-      "height": 1927,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/afvoerdruk/02.jpg",
+      "src": "/src/assets/artworks/afvoerdruk/02.jpg",
       "alt": "Afvoerdruk — Arne Nys",
-      "width": 3024,
-      "height": 4032,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/afvoerdruk/03.jpg",
+      "src": "/src/assets/artworks/afvoerdruk/03.jpg",
       "alt": "Afvoerdruk — Arne Nys",
-      "width": 3024,
-      "height": 4032,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/afvoerdruk/04.jpg",
+      "src": "/src/assets/artworks/afvoerdruk/04.jpg",
       "alt": "Afvoerdruk — Arne Nys",
-      "width": 4284,
-      "height": 5712,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/afvoerdruk/05.jpg",
+      "src": "/src/assets/artworks/afvoerdruk/05.jpg",
       "alt": "Afvoerdruk — Arne Nys",
-      "width": 3024,
-      "height": 4032,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

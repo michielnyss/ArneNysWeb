@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
 import ArtworkGrid from '../../components/ArtworkGrid.astro';
 import YearFilter from '../../components/YearFilter.astro';
 import { sortArtworks, yearsOf } from '../../lib/artworks';
@@ -19,34 +20,36 @@ export async function getStaticPaths() {
       params: { entry: String(year) },
       props: { kind: 'year' as const, year, artworks: artworks.filter((a) => a.data.year === year) },
     })),
-    ...artworks.map((work, i) => ({
+    ...artworks.map((work) => ({
       params: { entry: work.id },
-      props: {
-        kind: 'work' as const,
-        work,
-        prev: artworks[(i - 1 + artworks.length) % artworks.length],
-        next: artworks[(i + 1) % artworks.length],
-      },
+      props: { kind: 'work' as const, work },
     })),
   ];
 }
 
 type Props =
   | { kind: 'year'; year: number; artworks: CollectionEntry<'artworks'>[] }
-  | {
-      kind: 'work';
-      work: CollectionEntry<'artworks'>;
-      prev: CollectionEntry<'artworks'>;
-      next: CollectionEntry<'artworks'>;
-    };
+  | { kind: 'work'; work: CollectionEntry<'artworks'> };
 
 const props = Astro.props as Props;
 const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
+
+/** The caption block under the title, in the order the live site prints it. */
+const captionLines =
+  props.kind === 'work'
+    ? [
+        props.work.data.dimensions,
+        props.work.data.medium,
+        props.work.data.year ? String(props.work.data.year) : '',
+        props.work.data.status,
+      ].filter(Boolean)
+    : [];
 ---
 
 {
   props.kind === 'year' ? (
-    <Base title={`Artworks ${props.year} — Arne Nys`} theme="sage">
+    <Base title={`Artworks ${props.year}`} headerOverlay>
+      <Hero />
       <div class="wrap">
         <YearFilter years={allYears} active={props.year} />
         <ArtworkGrid artworks={props.artworks} />
@@ -54,13 +57,29 @@ const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
     </Base>
   ) : (
     <Base
-      title={`${props.work.data.title} — Arne Nys`}
-      description={props.work.data.description || `${props.work.data.title}, a work by Arne Nys`}
+      title={props.work.data.title}
+      description={
+        props.work.data.description ||
+        (captionLines.length
+          ? `${props.work.data.title} — ${captionLines.join(', ')}. A work by Arne Nys.`
+          : `${props.work.data.title}, a work by Arne Nys`)
+      }
       theme="sage"
+      jsonLd={[
+        {
+          '@type': 'VisualArtwork',
+          name: props.work.data.title,
+          creator: { '@id': new URL('/#arne-nys', Astro.site).href },
+          ...(props.work.data.year ? { dateCreated: String(props.work.data.year) } : {}),
+          ...(props.work.data.medium ? { artMedium: props.work.data.medium } : {}),
+          ...(props.work.data.dimensions ? { size: props.work.data.dimensions } : {}),
+          url: new URL(`/artworks/${props.work.id}/`, Astro.site).href,
+        },
+      ]}
     >
       <nav class="crumbs wrap" aria-label="Breadcrumb">
         <a href="/">Artworks</a>
-        <span aria-hidden="true">/</span>
+        <span aria-hidden="true">›</span>
         <span aria-current="page">{props.work.data.title}</span>
       </nav>
 
@@ -71,7 +90,7 @@ const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
               src={img.src}
               alt={img.alt || props.work.data.title}
               widths={[600, 900, 1400]}
-              sizes="(max-width: 900px) 100vw, 62vw"
+              sizes="(max-width: 900px) 100vw, 63vw"
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchpriority={i === 0 ? 'high' : undefined}
             />
@@ -80,32 +99,10 @@ const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
 
         <aside class="details">
           <h1>{props.work.data.title}</h1>
-          <dl>
-            {props.work.data.year && (
-              <>
-                <dt>Year</dt>
-                <dd>{props.work.data.year}</dd>
-              </>
-            )}
-            {props.work.data.medium && (
-              <>
-                <dt>Medium</dt>
-                <dd>{props.work.data.medium}</dd>
-              </>
-            )}
-            {props.work.data.dimensions && (
-              <>
-                <dt>Dimensions</dt>
-                <dd>{props.work.data.dimensions}</dd>
-              </>
-            )}
-          </dl>
+          {captionLines.map((line) => (
+            <p class="line">{line}</p>
+          ))}
           {props.work.data.description && <p class="blurb">{props.work.data.description}</p>}
-
-          <nav class="pager" aria-label="Other works">
-            <a href={`/artworks/${props.prev.id}/`} rel="prev">← {props.prev.data.title}</a>
-            <a href={`/artworks/${props.next.id}/`} rel="next">{props.next.data.title} →</a>
-          </nav>
         </aside>
       </article>
     </Base>
@@ -113,86 +110,65 @@ const allYears = yearsOf(sortArtworks(await getCollection('artworks')));
 }
 
 <style>
+  /* Breadcrumb sits 43px under the header, 22px above the first plate. */
   .crumbs {
-    max-width: none;
-    padding-inline: 1.5%;
     display: flex;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.03em;
-    padding-top: 0.25rem;
-    opacity: 0.85;
+    gap: 0.55rem;
+    padding-top: clamp(1.5rem, 3vw, 3rem);
   }
   .crumbs a:hover {
     border-bottom: 1px solid currentColor;
   }
 
-  /* Proportions measured off the live page: narrow gutter, wide plate column. */
+  /* Measured off the live page: 65% plate column, 2% gutter, 33% caption. */
   .work {
     display: grid;
     grid-template-columns: 65% minmax(0, 1fr);
-    gap: 9.5%;
+    gap: var(--gap);
     align-items: start;
-    padding-top: clamp(1rem, 3vh, 2rem);
-    max-width: none;
-    padding-inline: 1.5%;
+    padding-top: 22px;
   }
 
   .plates {
     display: grid;
-    gap: clamp(0.75rem, 1.6vw, 1.25rem);
+    gap: var(--gap);
   }
 
+  /* The live caption column tracks the plates as they scroll past. */
   .details {
+    text-align: center;
     position: sticky;
-    top: clamp(1.5rem, 6vh, 4rem);
+    top: 20px;
   }
   .details h1 {
     color: var(--cream);
-    font-size: clamp(1.8rem, 3.2vw, 2.9rem);
-    margin-bottom: 1.5rem;
+    font-size: clamp(1.6rem, 3.233vw, 3.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
-  dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.2rem 1.25rem;
-    margin: 0 0 1.5rem;
-    font-size: 0.8125rem;
-  }
-  dt {
-    opacity: 0.7;
-  }
-  dd {
+  .line {
     margin: 0;
+    padding-top: 12px;
+    color: var(--cream);
+  }
+  .line:first-of-type {
+    padding-top: 22px;
   }
 
   .blurb {
+    margin: 1.75rem auto 0;
     max-width: 34ch;
-    margin: 0 0 2rem;
-  }
-
-  .pager {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
-    opacity: 0.85;
-  }
-  .pager a:hover {
-    border-bottom: 1px solid currentColor;
   }
 
   @media (max-width: 900px) {
     .work {
       grid-template-columns: 1fr;
       gap: clamp(1.25rem, 4vw, 2rem);
-      padding-inline: var(--gutter);
     }
     .details {
-      position: static;
       order: -1;
+      position: static;
     }
   }
 </style>

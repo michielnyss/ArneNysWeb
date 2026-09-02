@@ -4,23 +4,20 @@
   "order": 31,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "33 × 95 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/falling-waters-rising-steam/01.jpg",
+      "src": "/src/assets/artworks/falling-waters-rising-steam/01.jpg",
       "alt": "Falling waters rising steam — Arne Nys",
-      "width": 1673,
-      "height": 1673,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/falling-waters-rising-steam/02.jpg",
+      "src": "/src/assets/artworks/falling-waters-rising-steam/02.jpg",
       "alt": "Falling waters rising steam — Arne Nys",
-      "width": 1360,
-      "height": 1360,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

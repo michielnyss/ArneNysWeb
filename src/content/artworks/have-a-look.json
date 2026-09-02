@@ -4,33 +4,28 @@
   "order": 28,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "50 × 72 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/have-a-look/01.jpg",
+      "src": "/src/assets/artworks/have-a-look/01.jpg",
       "alt": "Have a look — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/have-a-look/02.jpg",
+      "src": "/src/assets/artworks/have-a-look/02.jpg",
       "alt": "Have a look — Arne Nys",
-      "width": 1473,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
       }
     },
     {
-      "src": "../../assets/artworks/have-a-look/03.jpg",
+      "src": "/src/assets/artworks/have-a-look/03.jpg",
       "alt": "Have a look — Arne Nys",
-      "width": 1360,
-      "height": 2048,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

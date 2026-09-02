@@ -2,7 +2,11 @@
 // so /admin never depends on a third-party CDN at runtime.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ROOT } from './browser.mjs';
+import { fileURLToPath } from 'node:url';
+
+// Deliberately does not import ./browser.mjs: that pulls in Playwright, and
+// this script runs on every production build, where no browser is installed.
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const from = path.join(ROOT, 'node_modules', '@sveltia', 'cms', 'dist', 'sveltia-cms.js');
 const to = path.join(ROOT, 'public', 'admin', 'sveltia-cms.js');

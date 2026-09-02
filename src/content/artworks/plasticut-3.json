@@ -4,13 +4,12 @@
   "order": 13,
   "description": "",
   "medium": "",
-  "dimensions": "",
+  "dimensions": "15,5 × 9,5 cm",
+  "status": "",
   "gallery": [
     {
-      "src": "../../assets/artworks/plasticut-3/01.jpg",
+      "src": "/src/assets/artworks/plasticut-3/01.jpg",
       "alt": "Plasticut 3 — Arne Nys",
-      "width": 4366,
-      "height": 5828,
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

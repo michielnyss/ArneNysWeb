@@ -2,15 +2,15 @@
 # which triggers a rebuild and deploy.
 backend:
   name: github
-  repo: OWNER/REPO # TODO: set to the GitHub owner/name once the repo is pushed
+  repo: michielnyss/ArneNysWeb
   branch: main
 
-# Where uploaded images land, and how the site refers to them.
-media_folder: src/assets/artworks/_uploads
-public_folder: ../../assets/artworks/_uploads
+# Sveltia needs a global media folder to exist; the artworks collection
+# overrides it with a per-work one below.
+media_folder: src/assets/artworks
 
-site_url: https://www.ateliernys.com
-display_url: https://www.ateliernys.com
+site_url: https://www.arnenys.com
+display_url: https://www.arnenys.com
 logo_url: /admin/logo.png
 
 collections:
@@ -18,51 +18,103 @@ collections:
     label: Artworks
     label_singular: Artwork
     folder: src/content/artworks
+    # One folder per work, addressed absolutely from the repo root. Both parts
+    # matter: Sveltia only renders a thumbnail when the stored path is absolute
+    # (a relative "../../" path shows as a bare filename), and {{slug}} keeps a
+    # new photo filed with the work it belongs to. Astro's image() accepts the
+    # absolute form and still optimises normally.
+    media_folder: /src/assets/artworks/{{slug}}
+    public_folder: /src/assets/artworks/{{slug}}
     extension: json
     format: json
+    # The built-in preview pane just lists field names — it looks nothing like
+    # the site, so it is more confusing than helpful here.
+    editor:
+      preview: false
     create: true
     slug: '{{slug}}'
     identifier_field: title
-    summary: '{{title}} — {{year}}'
-    sortable_fields: [title, year, order]
+    # One line per work in the list: name, year, size, and the grid position
+    # it is currently sorted by. Two quirks are worked around here:
+    # `| date('YYYY')` because a plain {{year}} is run through the number
+    # formatter and renders as "2,026", and `| default('—')` because five works
+    # have no size and would otherwise trail an empty separator.
+    summary: "{{title}} · {{year | date('YYYY')}} · {{dimensions | default('—')}} · #{{order}}"
+    # Opens in the same order as the home-page grid, so "move this work
+    # forward" is a matter of comparing neighbours in the list.
+    sortable_fields:
+      fields: [order, title, year]
+      default:
+        field: order
+        direction: ascending
     view_groups:
       - label: Year
         field: year
+    # Written for the artist, not for a developer. Anything the site needs but
+    # nobody should have to think about is `widget: hidden` — it round-trips
+    # untouched instead of being dropped on save.
     fields:
-      - { name: title, label: Title, widget: string }
+      - { name: title, label: Title, widget: string, hint: 'The name of the work, as it should appear under the photo.' }
+
       - name: year
         label: Year
         widget: number
         value_type: int
         min: 1990
         max: 2100
-        required: false
-      - name: order
-        label: Sort order
-        widget: number
-        value_type: int
-        default: 0
-        hint: Lower numbers appear first within a year.
-      - name: description
-        label: Description
-        widget: text
-        required: false
-        hint: Shown next to the title on the artwork page.
-      - { name: medium, label: Medium, widget: string, required: false, hint: 'e.g. Plaster relief on panel' }
-      - { name: dimensions, label: Dimensions, widget: string, required: false, hint: 'e.g. 120 × 90 cm' }
-      - name: gallery
-        label: Images
-        label_singular: Image
-        widget: list
-        summary: '{{fields.alt}}'
-        hint: The first image is used as the cover in the grid.
-        fields:
-          - { name: src, label: Image, widget: image }
-          - { name: alt, label: Alt text, widget: string, required: false, hint: Describes the image for screen readers. }
-          - { name: width, label: Width (px), widget: number, value_type: int, required: false }
-          - { name: height, label: Height (px), widget: number, value_type: int, required: false }
-      - name: legacySlug
-        label: Old Squarespace slug
+        hint: The year you made it. This is also what the 2026 / 2025 / 2024 filter uses.
+
+      - name: dimensions
+        label: Size
         widget: string
         required: false
-        hint: Keeps the old URL redirecting here. Leave as-is.
+        hint: 'Height × width, e.g. 120 × 90 cm. Add a third number for a sculpture: 60 × 55 × 30 cm.'
+
+      - name: medium
+        label: Material
+        widget: string
+        required: false
+        hint: 'What it is made of, e.g. Aluminium, or Plaster relief on panel. Leave empty if you would rather not say.'
+
+      - name: status
+        label: Sold?
+        widget: select
+        required: false
+        options:
+          - { label: 'Available — show nothing', value: '' }
+          - { label: 'Sold', value: 'Sold' }
+          - { label: 'Reserved', value: 'Reserved' }
+        default: ''
+        hint: Shown as a line under the year on the work's own page.
+
+      - name: description
+        label: About this work
+        widget: text
+        required: false
+        hint: Optional. A few sentences shown under the size and year. Leave empty and nothing appears.
+
+      - name: gallery
+        label: Photos
+        label_singular: Photo
+        widget: list
+        hint: The first photo is the one shown in the grid on the home page. Drag to reorder.
+        fields:
+          - { name: src, label: Photo, widget: image }
+          - name: alt
+            label: Description of the photo
+            widget: string
+            required: false
+            hint: Read aloud to visitors who cannot see the image. One short sentence is plenty.
+          # Kept out of sight: inherited from Squarespace, and only two photos
+          # use anything other than dead centre.
+          - { name: focalPoint, label: Crop centre, widget: hidden, required: false }
+
+      - name: order
+        label: Position in the grid
+        widget: number
+        value_type: int
+        default: -1
+        hint: Lower numbers come first. A new work starts at −1 so it appears at the front — only change this if you want to move it.
+
+      # Keeps the old Squarespace address redirecting here.
+      - { name: legacySlug, label: Old address, widget: hidden, required: false }
