@@ -19,6 +19,12 @@
     { "pattern": "arnenys.com", "custom_domain": true }
   ],
 
+  // Keeps arnenysweb.<subdomain>.workers.dev serving as well. Declaring
+  // `routes` above turns this off by default, which takes away the one URL
+  // that works while a resolver still has the domain's old "no such host"
+  // answer cached — so it is worth an explicit true.
+  "workers_dev": true,
+
   "assets": {
     "directory": "dist",
     // Astro builds with format: 'directory', so /foo must find /foo/index.html.
