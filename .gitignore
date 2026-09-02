@@ -15,3 +15,4 @@ extracted/
 .claude.json.backup
 CLAUDE.md
 CLAUDE.local.md
+.wrangler/

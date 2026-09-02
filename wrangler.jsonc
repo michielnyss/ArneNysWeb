@@ -1,0 +1,18 @@
+// Deploys dist/ as plain static assets — no Worker script, no adapter.
+//
+// This file's presence is the point: without it, `wrangler deploy` decides the
+// project is an un-configured Astro app and runs `astro add cloudflare` mid-build,
+// which switches the site to the server adapter and turns the ~40 legacy
+// /artworks/p/<slug> redirects into Worker routes that then 404. The site is
+// fully static, so it wants no runtime at all.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arnenysweb",
+  "compatibility_date": "2026-08-31",
+  "assets": {
+    "directory": "dist",
+    // Astro builds with format: 'directory', so /foo must find /foo/index.html.
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
