@@ -1,0 +1,49 @@
+# Builds the site and deploys it to Cloudflare on every push to main, which
+# includes every save in the /admin editor (Sveltia CMS commits straight to
+# main). Can also be started by hand from the Actions tab.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time. A newer push waits for the running deploy instead of
+# racing it, so the last commit is always the one that ends up live.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Astro keeps its optimised images in node_modules/.astro. Re-encoding
+      # all ~500 of them takes about a minute, so carry them between runs.
+      - name: Cache optimised images
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-images-${{ github.run_id }}
+          restore-keys: astro-images-
+
+      - run: npm run build
+
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

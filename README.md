@@ -19,9 +19,10 @@ npm run preview    # serve dist/ locally
 Two ways in:
 
 1. **`/admin`** — a visual editor ([Sveltia CMS](https://github.com/sveltia/sveltia-cms)).
-   Saving commits to this repo, which triggers a rebuild and deploy. It works
-   locally today via *Work with Local Repository*; the GitHub sign-in button
-   additionally needs an OAuth app (see **Deploying**).
+   Open https://www.arnenys.com/admin/ and choose *Sign In with GitHub* (any
+   account with write access to this repo). Saving commits to `main`, which
+   rebuilds and deploys the site within a few minutes. Locally, `npm run dev`
+   also serves it, with *Work with Local Repository*.
 2. **By hand** — each artwork is one JSON file in `src/content/artworks/`,
    images alongside in `src/assets/artworks/<slug>/`.
 
@@ -104,29 +105,44 @@ checked against the original.
 
 ## Deploying
 
-Static output, so anything that serves files works. Cloudflare Pages or Netlify
-have free tiers; build command `npm run build`, output directory `dist`. A cold
-build re-encodes all ~500 images and takes about a minute.
+The site is live at **https://www.arnenys.com** (the apex `arnenys.com` and
+`arnenysweb.michiel-nys129.workers.dev` serve it too). It runs on Cloudflare
+Workers as plain static assets: `wrangler.jsonc` uploads `dist/` with no
+adapter and no Worker script, and binds both custom domains.
 
-`.nvmrc` pins Node 22, which Cloudflare Pages reads. Do not remove it: the
-platform still defaults to Node 18, and `astro.config.mjs` uses an import
-attribute (`with { type: 'json' }`) that Node 18 cannot parse.
+**Every push to `main` deploys automatically**, including every save in
+`/admin`. `.github/workflows/deploy.yml` runs `npm ci`, `npm run build` and
+`wrangler deploy`, one run at a time, and caches the optimised images in
+`node_modules/.astro` between runs. It needs two repository secrets,
+`CLOUDFLARE_API_TOKEN` (a token limited to deploying Workers on this account
+and the `arnenys.com` zone) and `CLOUDFLARE_ACCOUNT_ID`. A deploy can also be
+started by hand from the Actions tab, or locally with
+`npm run build && npx wrangler deploy`. A cold build re-encodes all ~500
+images and takes about a minute.
 
-Two things still to do at launch:
+The old `ateliernys.com` resolves to `185.104.28.27`, which is not
+Squarespace and answers nothing, so it cannot redirect here until its DNS is
+under our control.
 
-1. **Register and point the domain.** The site will live at **arnenys.com**,
-   which does not resolve yet (NXDOMAIN) — it still needs registering. The old
-   `ateliernys.com` resolves to `185.104.28.27`, which is not Squarespace and
-   answers nothing, so no redirect from it is possible until that DNS is under
-   our control. `site` in `astro.config.mjs` is already set to
-   `https://www.arnenys.com`.
-2. **Wire up `/admin` auth.** `backend.repo` is set to
-   `michielnyss/ArneNysWeb`, so the editor loads and offers three ways in:
-   *Work with Local Repository* (no setup — it opens the checkout straight from
-   the browser), *Sign In with GitHub*, and an access token. Only the GitHub
-   button needs work: Sveltia wants an OAuth app, so on Cloudflare deploy
-   [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) as a Worker
-   and set `base_url` in `public/admin/config.yml` to it.
+Keep `wrangler.jsonc`: without it, `wrangler deploy` runs
+`astro add cloudflare`, which switches the site to SSR and breaks the legacy
+redirects. Keep `.nvmrc` too: it pins Node 22, which the workflow reads, and
+`astro.config.mjs` uses an import attribute (`with { type: 'json' }`) that
+Node 18 cannot parse.
+
+### `/admin` sign-in
+
+*Sign In with GitHub* goes through
+[sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth), deployed as
+its own Worker at `https://sveltia-cms-auth.michiel-nys129.workers.dev`
+(`base_url` in `public/admin/config.yml`). It holds the client ID and secret
+of the GitHub OAuth app **arnenys.com CMS** on `michielnyss` as Worker
+secrets, and `ALLOWED_DOMAINS` restricts it to `www.arnenys.com` and
+`arnenys.com`. Its code is not in this repo; redeploy it from a clone of that
+project with `wrangler deploy`.
+
+Anyone with write access to this repo can sign in. To let Arne edit, add his
+GitHub account as a collaborator with write access.
 
 ## Notes
 

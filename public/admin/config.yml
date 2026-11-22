@@ -4,6 +4,9 @@ backend:
   name: github
   repo: michielnyss/ArneNysWeb
   branch: main
+  # GitHub sign-in goes through the sveltia-cms-auth Worker on Cloudflare,
+  # which holds the OAuth app's client secret.
+  base_url: https://sveltia-cms-auth.michiel-nys129.workers.dev
 
 # Sveltia needs a global media folder to exist; the artworks collection
 # overrides it with a per-work one below.
