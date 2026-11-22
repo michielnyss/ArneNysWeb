@@ -6,6 +6,7 @@ import Hero from '../../components/Hero.astro';
 import ArtworkGrid from '../../components/ArtworkGrid.astro';
 import YearFilter from '../../components/YearFilter.astro';
 import { sortArtworks, yearsOf } from '../../lib/artworks';
+import { widthsUpTo } from '../../lib/images';
 
 /**
  * Years and artwork slugs share the /artworks/ namespace, so one route
@@ -85,12 +86,15 @@ const captionLines =
 
       <article class="work wrap">
         <div class="plates">
+          {/* The plate column is 65% of the padded page (about 63vw), or the
+              whole padded page once the caption moves above it. Widths go up
+              to the full source, which a 2x desktop screen will use. */}
           {props.work.data.gallery.map((img, i) => (
             <Image
               src={img.src}
               alt={img.alt || props.work.data.title}
-              widths={[600, 900, 1400]}
-              sizes="(max-width: 900px) 100vw, 63vw"
+              widths={widthsUpTo(img.src.width, 480)}
+              sizes="(max-width: 767px) 88vw, (max-width: 900px) 97vw, 63vw"
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchpriority={i === 0 ? 'high' : undefined}
             />

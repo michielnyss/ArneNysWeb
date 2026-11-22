@@ -117,8 +117,8 @@ adapter and no Worker script, and binds both custom domains.
 `CLOUDFLARE_API_TOKEN` (a token limited to deploying Workers on this account
 and the `arnenys.com` zone) and `CLOUDFLARE_ACCOUNT_ID`. A deploy can also be
 started by hand from the Actions tab, or locally with
-`npm run build && npx wrangler deploy`. A cold build re-encodes all ~500
-images and takes about a minute.
+`npm run build && npx wrangler deploy`. A cold build re-encodes all ~720
+image files and takes about two minutes; with the cache, about 15 seconds.
 
 The old `ateliernys.com` resolves to `185.104.28.27`, which is not
 Squarespace and answers nothing, so it cannot redirect here until its DNS is
@@ -175,6 +175,14 @@ GitHub account as a collaborator with write access.
   from `extracted/`, though — **do not run it once the site is live and Arne
   has started editing**, or his changes are gone. It is a migration tool, not a
   maintenance one.
+- **Images** go through `src/lib/image-service.ts`, Astro's sharp service with
+  two changes: WebP at quality 90 instead of sharp's 80, and grid covers
+  cropped to their 2:3 frame at build time around `focalPoint` (CSS
+  `object-position` semantics), so the grid never downloads pixels only to
+  hide them. Each `<Image>` offers widths up to the full source
+  (`src/lib/images.ts`) with a `sizes` that matches the CSS, so 2x and 3x
+  screens get sharp files. The photos are the Squarespace originals: its CDN
+  holds nothing larger.
 - The live site has an English/Dutch switcher (Squarespace's auto-translate
   widget) and a cookie banner. Neither is reproduced: there is no Dutch copy to
   serve, and the site sets no cookies.

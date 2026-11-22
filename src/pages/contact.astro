@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import portrait from '../assets/site/contact.jpg';
+import { widthsUpTo } from '../lib/images';
 
 const bio = [
   'Arne Nys (b. 1998) is a Belgian artist living and working in Lichtaart. He works across sculpture, drawing, printmaking, and painting, exploring the relationship between material, time, and transformation.',
@@ -16,12 +17,14 @@ const bio = [
   theme="sage"
 >
   <div class="contact">
+    {/* At most 545px wide (88vw on phones), so 1640px is enough for 3x.
+        Astro caps the widths at the source width by itself. */}
     <Image
       class="portrait"
       src={portrait}
       alt="Arne Nys in the studio"
-      widths={[600, 900, 1200]}
-      sizes="(max-width: 767px) 88vw, 38vw"
+      widths={widthsUpTo(1640, 480)}
+      sizes="(max-width: 767px) 88vw, 545px"
     />
 
     <div class="bio">

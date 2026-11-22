@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { cropWidth, widthsUpTo } from '../lib/images';
 
 interface Props {
   artworks: CollectionEntry<'artworks'>[];
@@ -12,6 +13,12 @@ const { artworks } = Astro.props;
   {
     artworks.map((work) => {
       const cover = work.data.gallery[0];
+      // The frame is 2:3, so the build crops the cover to 2:3 itself (around
+      // its focal point) and every pixel served is a pixel shown. `sizes` is
+      // then simply the frame width: one column of four, or the full column
+      // below 768px. 2040px covers a 3x phone and a 2x tablet.
+      const width = cover && Math.min(cropWidth(cover.src, 2 / 3), 2040);
+      const focus = cover?.focalPoint ?? { x: 0.5, y: 0.5 };
       return (
         <li>
           <a href={`/artworks/${work.id}/`}>
@@ -20,13 +27,12 @@ const { artworks } = Astro.props;
                 <Image
                   src={cover.src}
                   alt={cover.alt || work.data.title}
-                  widths={[320, 480, 720, 960, 1200]}
+                  width={width}
+                  height={Math.round(width * 1.5)}
+                  fit="cover"
+                  position={`${+(focus.x * 100).toFixed(2)}% ${+(focus.y * 100).toFixed(2)}%`}
+                  widths={widthsUpTo(width)}
                   sizes="(max-width: 767px) 88vw, 23vw"
-                  style={
-                    cover.focalPoint
-                      ? `object-position:${cover.focalPoint.x * 100}% ${cover.focalPoint.y * 100}%`
-                      : undefined
-                  }
                   loading="lazy"
                 />
               </div>

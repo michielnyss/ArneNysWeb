@@ -1,14 +1,32 @@
 ---
 import { Image } from 'astro:assets';
 import hero from '../assets/site/hero-home.png';
+import { widthsUpTo } from '../lib/images';
+
+/*
+ * The banner covers the hero box, so whichever is larger fills it: the full
+ * viewport width, or the box height times the photo's aspect ratio (on
+ * phones, where the box is taller than it is wide). The heights repeat the
+ * clamp()s in the style block below.
+ *
+ * The ratio is written out (hero-home.png is 2500x1576) because reading
+ * hero.width would make Astro ship the 5 MB original PNG in dist/ as well.
+ * For the same reason the widths are not capped here: Astro drops the ones
+ * wider than the source and adds the source width itself.
+ */
+const ratio = 1.586;
+const sizes = [
+  `(max-width: 767px) max(100vw, calc(clamp(360px, 12vw + 60vh, 640px) * ${ratio}))`,
+  `max(100vw, calc(clamp(320px, 24vw + 21vh, 720px) * ${ratio}))`,
+].join(', ');
 ---
 
 <section class="hero">
   <Image
     src={hero}
     alt=""
-    widths={[900, 1440, 2000]}
-    sizes="100vw"
+    widths={widthsUpTo(3600, 640)}
+    sizes={sizes}
     loading="eager"
     fetchpriority="high"
   />

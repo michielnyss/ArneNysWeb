@@ -7,6 +7,8 @@ export default defineConfig({
   // Old Squarespace product URLs (/artworks/p/<slug>) keep working.
   redirects: { ...redirects, '/home': '/', '/artworks': '/' },
   build: { format: 'directory' },
-  image: { responsiveStyles: true },
+  // The custom service is sharp with a higher default quality and focal-point
+  // crops; see the comment at the top of the file.
+  image: { responsiveStyles: true, service: { entrypoint: './src/lib/image-service.ts' } },
   integrations: [sitemap({ filter: (page) => !page.includes('/admin') })],
 });
