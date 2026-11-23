@@ -54,8 +54,10 @@ async function api(path, opts = {}) {
   return body;
 }
 
+/** A repo photo through the Worker (the repo may be private), pinned to the commit. */
 function photoUrl(src) {
-  return `https://raw.githubusercontent.com/${S.session.repo}/${S.head}${src}`;
+  const path = String(src).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+  return `/api/photo/${S.head}/${path}`;
 }
 
 function workBySlug(slug) {

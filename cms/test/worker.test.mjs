@@ -59,6 +59,10 @@ globalThis.fetch = async (input, init = {}) => {
   if (url.endsWith('/git/blobs')) return ok({ sha: 'f'.repeat(40) }, 201);
   if (url.endsWith('/git/trees')) return ok({ sha: '1'.repeat(40) }, 201);
   if (url.endsWith('/git/commits')) return ok({ sha: '2'.repeat(40) }, 201);
+  if (url.includes('/repos/michielnyss/ArneNysWeb/contents/')) {
+    if (url.includes('/missing.jpg')) return ok({ message: 'Not Found' }, 404);
+    return new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), { headers: { 'content-type': 'application/octet-stream', 'content-length': '4' } });
+  }
   if (url.endsWith('/git/refs/heads/main')) return refStatus === 200 ? ok({}) : ok({ message: 'Update is not a fast forward' }, refStatus);
   return new Response('unexpected ' + url, { status: 599 });
 };
@@ -178,4 +182,65 @@ test('if main moved during the save, it re-plans and then reports failure cleanl
   assert.equal(res.status, 500);
   assert.equal(calls.filter((c) => c.url.endsWith('/git/refs/heads/main')).length, 3);
   assert.match((await res.json()).error, /Nothing was saved/);
+});
+
+const COMMIT = 'c'.repeat(40);
+
+test('repo photos come through the Worker, pinned to the commit, as raw bytes', async () => {
+  const jwt = await accessJwt(goodClaims);
+  calls.length = 0;
+  const res = await worker.fetch(await req(`/api/photo/${COMMIT}/src/assets/artworks/avondwind/01.jpg`, { jwt }), env());
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-type'), 'image/jpeg');
+  assert.match(res.headers.get('cache-control'), /private/);
+  assert.match(res.headers.get('cache-control'), /immutable/);
+  assert.deepEqual([...new Uint8Array(await res.arrayBuffer())], [0xff, 0xd8, 0xff, 0xe0]);
+  const gh = calls.find((c) => c.url.includes('/contents/'));
+  assert.equal(gh.url, `https://api.github.com/repos/michielnyss/ArneNysWeb/contents/src/assets/artworks/avondwind/01.jpg?ref=${COMMIT}`);
+  assert.equal(gh.headers.accept, 'application/vnd.github.raw');
+  assert.equal(gh.headers.authorization, 'Bearer inst-token');
+});
+
+test('the photo route needs sign-in', async () => {
+  calls.length = 0;
+  const res = await worker.fetch(await req(`/api/photo/${COMMIT}/src/assets/artworks/avondwind/01.jpg`), env());
+  assert.equal(res.status, 403);
+  assert.ok(!calls.some((c) => c.url.includes('/contents/')));
+});
+
+test('the photo route only serves images under src/assets/', async () => {
+  const jwt = await accessJwt(goodClaims);
+  const bad = [
+    `/api/photo/${COMMIT}/src/content/artworks/avondwind.json`,
+    `/api/photo/${COMMIT}/README.md`,
+    `/api/photo/${COMMIT}/src/assets/artworks/avondwind/notes.txt`,
+    `/api/photo/${COMMIT}/src/assets/artworks/x/logo.svg`,
+    `/api/photo/${COMMIT}/src/assets/%2e%2e/%2e%2e/cms/wrangler.jsonc`,
+    `/api/photo/${COMMIT}/src/assets/artworks/..%2F..%2F..%2Fsecret.jpg`,
+    `/api/photo/${COMMIT}/src/assets/artworks%5C..%5C..%5Cx.jpg`,
+    `/api/photo/${COMMIT}/src/assets//x.jpg`,
+    `/api/photo/${COMMIT}/src/assets/%E0%A4%A.jpg`,
+    `/api/photo/main/src/assets/artworks/avondwind/01.jpg`,
+    `/api/photo/${'C'.repeat(40)}/src/assets/artworks/avondwind/01.jpg`,
+    `/api/photo/${COMMIT}`,
+  ];
+  calls.length = 0;
+  for (const path of bad) {
+    const res = await worker.fetch(await req(path, { jwt }), env());
+    assert.equal(res.status, 404, path);
+  }
+  assert.ok(!calls.some((c) => c.url.includes('/contents/')), 'GitHub was never asked');
+});
+
+test('a photo missing on GitHub is a 404, not an error', async () => {
+  const jwt = await accessJwt(goodClaims);
+  const res = await worker.fetch(await req(`/api/photo/${COMMIT}/src/assets/artworks/avondwind/missing.jpg`, { jwt }), env());
+  assert.equal(res.status, 404);
+});
+
+test('the CSP no longer allows images from raw.githubusercontent.com', async () => {
+  const jwt = await accessJwt(goodClaims);
+  const page = await worker.fetch(await req('/', { jwt }), env());
+  assert.doesNotMatch(page.headers.get('content-security-policy'), /githubusercontent\.com(?!\S*google)/);
+  assert.doesNotMatch(page.headers.get('content-security-policy'), /raw\.githubusercontent/);
 });

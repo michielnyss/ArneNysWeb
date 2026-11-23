@@ -1,9 +1,10 @@
 // `npm run dev:mock`: the editor on http://localhost:8787 with no secrets and
 // no way to write. The real Worker code runs in Node against a stand-in for
 // GitHub that serves the works from this checkout, and DRY_RUN is forced on,
-// so Save only reports what it would commit. Photos load from
-// raw.githubusercontent.com at the checkout's HEAD commit, which therefore has
-// to be pushed. For trying out the editor and for screenshots; never deployed.
+// so Save only reports what it would commit. Photos go through the Worker's
+// /api/photo route like in production; the stand-in answers those reads from
+// the files on disk (whatever the commit in the URL), so nothing has to be
+// pushed. For trying out the editor and for screenshots; never deployed.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
@@ -47,6 +48,17 @@ globalThis.fetch = async (input, init = {}) => {
       assets: { object: { entries: Object.entries(snap.assets).map(([s, names]) => ({ name: s, type: 'tree', object: { entries: names.map((n) => ({ name: n, type: 'blob' })) } })) } },
     } } } } });
   }
+  const contents = /^https:\/\/api\.github\.com\/repos\/[^/]+\/[^/]+\/contents\/([^?]+)/.exec(url);
+  if (contents && (init.method || 'GET') === 'GET') {
+    const rel = contents[1].split('/').map(decodeURIComponent).join('/');
+    const file = path.resolve(ROOT, rel);
+    if (!file.startsWith(path.join(ROOT, 'src', 'assets') + path.sep)) return ok({ message: 'Not Found' }, 404);
+    try {
+      return new Response(await readFile(file), { headers: { 'content-type': 'application/octet-stream' } });
+    } catch {
+      return ok({ message: 'Not Found' }, 404);
+    }
+  }
   if (url.startsWith('https://api.github.com')) return ok({ message: 'The mock server never writes.' }, 403);
   return realFetch(input, init);
 };
@@ -67,4 +79,4 @@ createServer(async (req, res) => {
   const out = await worker.fetch(request, env);
   res.writeHead(out.status, Object.fromEntries(out.headers));
   res.end(Buffer.from(await out.arrayBuffer()));
-}).listen(PORT, () => console.log(`Mock editor (test mode, no writes) on http://localhost:${PORT}  [photos from ${head.slice(0, 7)}]`));
+}).listen(PORT, () => console.log(`Mock editor (test mode, no writes) on http://localhost:${PORT}  [photos from disk, head ${head.slice(0, 7)}]`));

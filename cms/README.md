@@ -30,6 +30,7 @@ browser ──► Cloudflare Access (Google or email-code sign-in, email allow-l
               ├─ checks the Access JWT again (src/access.js)
               ├─ serves the editor (public/, bundled from ui/)
               └─ /api/*  ──► GitHub API as the "arnenys-admin" GitHub App (src/github.js)
+                             (photos too: /api/photo/<commit>/src/assets/..., so the repo can be private)
 browser ──► Google Picker + Drive download (drive.file token, in the browser only)
 ```
 
@@ -37,7 +38,8 @@ browser ──► Google Picker + Drive download (drive.file token, in the brows
 |---|---|
 | `src/worker.js` | Router, security headers, API endpoints, dry-run switch |
 | `src/access.js` | Cloudflare Access JWT validation and the signed-in person's name |
-| `src/github.js` | GitHub App token, one-request repo snapshot (GraphQL), blob upload, commit |
+| `src/github.js` | GitHub App token, one-request repo snapshot (GraphQL), raw file read, blob upload, commit |
+| `src/photo.js` | Which `/api/photo/...` paths may be read: images under `src/assets/` only, no traversal |
 | `src/save.js` | Turns a save request into the exact file changes for one commit (pure, tested) |
 | `shared/artwork.js` | The artwork JSON rules, mirroring `src/content.config.ts` and `public/admin/config.yml` |
 | `../src/lib/crop.js` | The grid crop (size and rectangle). The site's image service cuts the covers with it and the editor draws its tiles with it, so the two cannot drift |
@@ -177,7 +179,15 @@ shows, and uploads are discarded), set it to `"true"` and run `npm run deploy`.
 - The Google account `michiel.nys129@gmail.com` is supervised (Family Link). Signing in
   to the Picker with it asks a parent to approve. Use another Google account for the
   editor, such as `michiel@ateliernys.com` or Arne's own.
-- Thumbnails are loaded at full size from `raw.githubusercontent.com`, pinned to the commit.
-  That is fine for about 30 works, but heavy on a phone with mobile data.
+- Photos already in the repo are loaded through the Worker (`GET /api/photo/<commit sha>/src/assets/...`,
+  behind Access like every other route), not from `raw.githubusercontent.com`, so the repo can be
+  private. The Worker reads the file with the GitHub App token, pinned to that commit, using the
+  raw media type (`application/vnd.github.raw`, files up to 100 MB; the base64 JSON form stops at
+  1 MB). Only images (jpg, jpeg, png, webp, gif, avif) under `src/assets/` are served; anything else,
+  including `..` and encoded slashes, is a 404 without asking GitHub. Responses are cached
+  `private, max-age=31536000, immutable`, because the URL names the commit.
+- Thumbnails are loaded at full size. That is fine for about 30 works, but heavy on a phone
+  with mobile data, and each first view of a photo costs one GitHub API request (the App's
+  limit is 5,000 an hour, far above what the editor uses).
 - libheif-js is LGPL-3.0. It is shipped unmodified as a separate bundle
   (`public/build/convert-worker.js`), with its licence in the bundle's `.LEGAL.txt`.

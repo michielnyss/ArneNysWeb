@@ -139,6 +139,19 @@ export async function snapshot(env) {
   return { head: c.oid, tree: c.tree.oid, works, assets };
 }
 
+/**
+ * One file's raw bytes at a given commit, as GitHub's Response (not checked;
+ * the caller looks at the status). The raw media type streams the file as is,
+ * which works up to 100 MB, unlike the base64 JSON form (1 MB).
+ */
+export function readFile(env, path, ref) {
+  const { owner, repo } = repoParts(env);
+  const p = path.split('/').map(encodeURIComponent).join('/');
+  return gh(env, `/repos/${owner}/${repo}/contents/${p}?ref=${encodeURIComponent(ref)}`, {
+    headers: { accept: 'application/vnd.github.raw' },
+  });
+}
+
 /** Uploads one photo. `body` is a JSON {content: base64, encoding: "base64"} stream. */
 export async function createBlob(env, body, length) {
   const { owner, repo } = repoParts(env);

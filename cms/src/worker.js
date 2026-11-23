@@ -2,6 +2,7 @@
 //
 //   GET  /api/session   who is signed in, plus the public Google Picker config
 //   GET  /api/works     every artwork as it is on main right now
+//   GET  /api/photo/<commit sha>/src/assets/...   one repo image at that commit
 //   POST /api/blob      upload one photo (base64 JSON) -> blob sha
 //   POST /api/save      commit edits/new works/deletions to main in one commit
 //   *                   the editor's static files (public/)
@@ -11,7 +12,8 @@
 // GitHub: uploads are discarded and a save only reports what it would commit.
 
 import { authenticate } from './access.js';
-import { commit, createBlob, repoParts, snapshot } from './github.js';
+import { commit, createBlob, readFile, repoParts, snapshot } from './github.js';
+import { parsePhotoPath } from './photo.js';
 import { planSave, SaveError } from './save.js';
 
 const MAX_BLOB_BYTES = 30 * 1024 * 1024; // a 20 MB photo is ~27 MB as base64 JSON
@@ -20,7 +22,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' https://apis.google.com https://accounts.google.com/gsi/client 'wasm-unsafe-eval'",
   "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
-  "img-src 'self' data: blob: https://raw.githubusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.google.com",
+  "img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com https://*.google.com",
   "connect-src 'self' blob: https://www.googleapis.com https://content.googleapis.com https://accounts.google.com/gsi/",
   'frame-src https://docs.google.com https://drive.google.com https://accounts.google.com https://content.googleapis.com',
   "font-src 'self'",
@@ -104,6 +106,30 @@ export default {
           works: Object.entries(s.works).map(([slug, w]) => ({ slug, sha: w.sha, data: JSON.parse(w.text) })),
           assets: s.assets,
         });
+      }
+
+      if (url.pathname.startsWith('/api/photo/') && request.method === 'GET') {
+        const photo = parsePhotoPath(url.pathname);
+        if (!photo) return json({ error: 'Not found.' }, 404);
+        const res = await readFile(env, photo.path, photo.sha);
+        if (res.status === 404) {
+          await res.body?.cancel();
+          return json({ error: 'Not found.' }, 404);
+        }
+        if (!res.ok) {
+          console.error('photo', photo.path, res.status);
+          await res.body?.cancel();
+          return json({ error: 'Could not load that photo from GitHub.' }, 502);
+        }
+        const headers = {
+          ...security,
+          'content-type': photo.type,
+          // The URL names the commit, so the bytes behind it never change.
+          'cache-control': 'private, max-age=31536000, immutable',
+        };
+        const length = res.headers.get('content-length');
+        if (length) headers['content-length'] = length;
+        return new Response(res.body, { status: 200, headers });
       }
 
       if (url.pathname === '/api/blob' && request.method === 'POST') {
