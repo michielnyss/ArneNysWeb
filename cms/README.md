@@ -7,6 +7,13 @@ A small, friendly editor for the works on arnenys.com, made for Arne:
 - He edits a work's title, year, size, material, sold/reserved status, description,
   photos (order, cover, descriptions) and grid position. He can also add and delete works,
   and drag works into a new order.
+- The list of works **is the home page grid**: the same columns, 2:3 tiles, captions, colours
+  and fonts as arnenys.com, with each cover cropped exactly as the site crops it. Works are
+  dragged around in it (or moved with the arrows under each tile).
+- On a work, **The cover in the grid** shows the cover with the 2:3 frame over it. Dragging
+  the frame, tapping a spot, or the arrow keys set the photo's `focalPoint`, with a live tile
+  beside it and **Reset to centre**. Below the form, **How the page will look** previews the
+  work's own page and follows what he types.
 - **Choose from Google Drive** opens the Google Picker, which grants access to the picked
   files only (`drive.file`, not his whole Drive). **Upload from this device** also works.
 - **Save** makes one Git commit to `michielnyss/ArneNysWeb` `main` on the server side,
@@ -33,6 +40,9 @@ browser ──► Google Picker + Drive download (drive.file token, in the brows
 | `src/github.js` | GitHub App token, one-request repo snapshot (GraphQL), blob upload, commit |
 | `src/save.js` | Turns a save request into the exact file changes for one commit (pure, tested) |
 | `shared/artwork.js` | The artwork JSON rules, mirroring `src/content.config.ts` and `public/admin/config.yml` |
+| `../src/lib/crop.js` | The grid crop (size and rectangle). The site's image service cuts the covers with it and the editor draws its tiles with it, so the two cannot drift |
+| `ui/crop.js` | Turns that rectangle into CSS for the tiles and the crop frame (pure, tested) |
+| `public/fonts/` | The site's fonts (Libre Baskerville, Almarai; SIL OFL), self-hosted for the grid and page preview |
 | `ui/` | The editor (plain DOM + SortableJS), photo clean-up, HEIC conversion, Drive Picker |
 | `test/` | Unit and integration tests, plus `schema-check.mjs` against the real Astro schema |
 
@@ -44,7 +54,14 @@ browser ──► Google Picker + Drive download (drive.file token, in the brows
 - Files are written as 2-space JSON with a trailing newline, the same as now. Saving a work
   unchanged gives a byte-identical file. The tests check this for every work in the repo.
 - Unknown keys, key order, the hidden `legacySlug` and each photo's `focalPoint` are copied
-  over untouched.
+  over untouched. The UI only sends a `focalPoint` for a photo whose crop Arne changed. A
+  centred crop is not added to a photo that had none, so opening the crop editor changes
+  nothing. A photo that is 2:3 already (or loses under 1.5% of its width or height, like the
+  many 1360 × 2048 photos) gets a "no crop needed" note instead of a frame to drag.
+- The commit body says what changed per work, e.g. `- "Einstein": Changed: title, crop of
+  cover; added 2 photos`.
+- The grid and page preview copy the site's CSS (bottom of `public/app.css`). If
+  `ArtworkGrid.astro`, `[entry].astro` or `global.css` change their look, update it there.
 - New works start at `order: -1`. The slug comes from the title, as Sveltia makes it,
   without clashing with existing works, years or `p`. New photos are named `NN.ext` in
   `src/assets/artworks/<slug>/`, continuing the numbering. They are referenced as
@@ -128,6 +145,7 @@ npm install
 npm test               # unit + integration tests (mock GitHub, mock Access)
 npm run check-schema   # validates written JSON with the site's real Astro schema (astro sync)
 npm run dev            # local copy on http://localhost:8787 (see below)
+npm run dev:mock       # same, with no secrets at all: works from this checkout, saves are dry runs
 npm run deploy         # build ui/ and deploy the Worker to admin.arnenys.com
 ```
 

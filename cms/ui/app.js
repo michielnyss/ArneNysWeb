@@ -7,6 +7,9 @@ import {
 } from '../shared/artwork.js';
 import { configureDrive, driveAvailable, pickFromDrive } from './drive.js';
 import { preparePhoto, PhotoProblem } from './prepare.js';
+import {
+  cropAxis, focalCentredOn, focalFromEdge, framePlacement, gridCrop, tilePlacement, withAxis,
+} from './crop.js';
 
 const S = {
   session: null,
@@ -63,8 +66,30 @@ function sortedWorks() {
   return [...S.works].sort(compareWorks);
 }
 
-function metaLine(d) {
-  return [d.year ?? '', d.dimensions || ''].filter(Boolean).join(' · ');
+/** Which screen is showing; the list and the page preview use the site's own look. */
+function setScreen(name) {
+  document.body.dataset.screen = name;
+}
+
+/**
+ * A 2:3 grid tile showing exactly the crop the site's build makes of the
+ * photo: the same rectangle (src/lib/crop.js), placed with exact CSS. Until
+ * the photo has loaded (its size is needed) it shows a plain centred cover.
+ */
+function gridFrame(url, focal) {
+  const img = h('img', { src: url, alt: '', decoding: 'async', loading: 'lazy', draggable: 'false' });
+  const frame = h('div', { class: 'site-frame' }, img);
+  frame.place = (f) => {
+    focal = f;
+    const w = img.naturalWidth;
+    const ht = img.naturalHeight;
+    if (!w || !ht) return;
+    Object.assign(img.style, tilePlacement(gridCrop(w, ht, focal), w, ht));
+    img.classList.add('placed');
+  };
+  img.addEventListener('load', () => frame.place(focal));
+  if (img.complete) frame.place(focal);
+  return frame;
 }
 
 // ------------------------------------------------------------- status bar
@@ -105,7 +130,7 @@ async function boot() {
     window.addEventListener('hashchange', route);
     route();
   } catch (e) {
-    $app().replaceChildren(h('div', { class: 'panel error-panel' }, h('h2', {}, 'The editor could not start'), h('p', {}, e.message),
+    $app().replaceChildren(h('div', { class: 'panel error-panel narrow' }, h('h2', {}, 'The editor could not start'), h('p', {}, e.message),
       h('button', { class: 'btn', onclick: () => location.reload() }, 'Try again')));
   }
 }
@@ -143,34 +168,34 @@ function showList() {
     return;
   }
   disposeDraft();
+  setScreen('list');
   document.title = 'Works — arnenys.com admin';
-  const list = h('ol', { class: 'works', 'aria-label': 'All works, in the order of the website grid' });
-  const order = S.pendingOrder || sortedWorks().map((w) => w.slug);
-  for (const slug of order) {
+  // The works as the home page grid shows them: same columns, tiles, crop and captions.
+  const list = h('ol', { class: 'site-grid', 'aria-label': 'All works, in the order of the website grid' });
+  const order = (S.pendingOrder || sortedWorks().map((w) => w.slug)).filter((slug) => workBySlug(slug));
+  order.forEach((slug, i) => {
     const w = workBySlug(slug);
-    if (!w) continue;
     const cover = w.data.gallery?.[0];
+    const title = w.data.title || 'Untitled';
     list.append(
-      h('li', { class: 'work', 'data-slug': w.slug },
-        h('span', { class: 'handle', title: 'Drag to move', 'aria-hidden': 'true' }, '⠿'),
-        h('button', { class: 'work-open', onclick: () => openWork(w.slug) },
-          cover ? h('img', { class: 'thumb', src: photoUrl(cover.src), alt: '', loading: 'lazy', decoding: 'async' }) : h('span', { class: 'thumb empty' }, 'No photo'),
-          h('span', { class: 'work-text' },
-            h('span', { class: 'work-title' }, w.data.title || 'Untitled'),
-            h('span', { class: 'work-meta' }, metaLine(w.data)),
-            w.data.status ? h('span', { class: `badge ${w.data.status.toLowerCase()}` }, w.data.status) : null,
-          ),
+      h('li', { class: 'tile', 'data-slug': w.slug },
+        h('a', {
+          class: 'tile-link', href: `#/work/${encodeURIComponent(w.slug)}`, draggable: 'false',
+          onclick: (e) => { e.preventDefault(); if (Date.now() - dragEndedAt > 300) openWork(w.slug); },
+        },
+          cover ? gridFrame(photoUrl(cover.src), cover.focalPoint) : h('div', { class: 'site-frame empty' }, h('span', {}, 'No photo yet')),
+          h('span', { class: 'site-caption' }, title),
         ),
-        h('span', { class: 'move' },
-          h('button', { class: 'icon-btn', title: 'Move up', 'aria-label': `Move ${w.data.title} up`, onclick: () => nudge(w.slug, -1) }, '↑'),
-          h('button', { class: 'icon-btn', title: 'Move down', 'aria-label': `Move ${w.data.title} down`, onclick: () => nudge(w.slug, 1) }, '↓'),
+        h('span', { class: 'tile-tools' },
+          h('button', { class: 'icon-btn move-earlier', type: 'button', title: 'Move earlier', 'aria-label': `Move “${title}” earlier`, disabled: i === 0, onclick: () => nudge(w.slug, -1) }),
+          h('button', { class: 'icon-btn move-later', type: 'button', title: 'Move later', 'aria-label': `Move “${title}” later`, disabled: i === order.length - 1, onclick: () => nudge(w.slug, 1) }),
         ),
       ),
     );
-  }
+  });
 
   const orderBar = h('div', { class: 'action-bar', id: 'order-bar', hidden: !S.pendingOrder },
-    h('span', { class: 'save-state pending' }, 'The order has changed, but is not saved yet.'),
+    h('span', { class: 'save-state pending' }, 'Order not saved'),
     h('span', { class: 'bar-buttons' },
       h('button', { class: 'btn quiet', onclick: () => { S.pendingOrder = null; showList(); } }, 'Undo'),
       h('button', { class: 'btn primary', id: 'save-order', onclick: saveOrder }, 'Save order'),
@@ -178,22 +203,26 @@ function showList() {
   );
 
   $app().replaceChildren(
-    h('div', { class: 'list-head' },
+    h('div', { class: 'list-head narrow' },
       h('div', {},
         h('h1', {}, 'Works'),
-        h('p', { class: 'lede' }, 'Tap a work to change it. To change the order on the website, drag a work by ', h('span', { class: 'handle-inline' }, '⠿'), ' or use the arrows. The top of this list is the top of the website.'),
       ),
       h('button', { class: 'btn primary', onclick: () => { if (confirmDiscardOrder()) go('#/new'); } }, '+ Add a new work'),
     ),
-    list,
+    h('div', { class: 'site site-wrap site-home' }, list),
     orderBar,
   );
 
   Sortable.create(list, {
-    handle: '.handle',
     animation: 150,
     ghostClass: 'drag-ghost',
+    filter: '.tile-tools',
+    preventOnFilter: false,
+    // On a phone a short press scrolls; press and hold to pick a work up.
+    delay: 200,
+    delayOnTouchOnly: true,
     onEnd: () => {
+      dragEndedAt = Date.now();
       S.pendingOrder = [...list.children].map((li) => li.dataset.slug);
       if (S.pendingOrder.join() === sortedWorks().map((w) => w.slug).join()) S.pendingOrder = null;
       document.getElementById('order-bar').hidden = !S.pendingOrder;
@@ -211,8 +240,12 @@ function nudge(slug, dir) {
   const y = window.scrollY;
   showList();
   window.scrollTo(0, y);
-  document.querySelector(`[data-slug="${CSS.escape(slug)}"] .move button:${dir < 0 ? 'first-child' : 'last-child'}`)?.focus();
+  const tools = document.querySelector(`[data-slug="${CSS.escape(slug)}"] .tile-tools`);
+  const btn = tools?.querySelector(dir < 0 ? '.move-earlier' : '.move-later');
+  (btn && !btn.disabled ? btn : tools?.querySelector('button:not(:disabled)'))?.focus();
 }
+
+let dragEndedAt = 0;
 
 function confirmDiscardOrder() {
   if (!S.pendingOrder) return true;
@@ -247,7 +280,8 @@ function disposeDraft() {
 function showEditor(slug) {
   const w = slug ? workBySlug(slug) : null;
   if (slug && !w) {
-    $app().replaceChildren(h('div', { class: 'panel' }, h('p', {}, 'This work no longer exists. It may have been deleted.'),
+    setScreen('editor');
+    $app().replaceChildren(h('div', { class: 'panel narrow' }, h('p', {}, 'This work no longer exists. It may have been deleted.'),
       h('a', { class: 'btn', href: '#/' }, '← All works')));
     return;
   }
@@ -258,18 +292,20 @@ function showEditor(slug) {
       slug,
       baseSha: w?.sha ?? null,
       original: d,
-      photos: (d.gallery || []).map((g) => ({ key: ++photoSeq, src: g.src, alt: g.alt ?? '' })),
+      // focal: the photo's crop centre as stored (undefined if none);
+      // focalTouched: the crop editor changed it, so the save sends it.
+      photos: (d.gallery || []).map((g) => ({ key: ++photoSeq, src: g.src, alt: g.alt ?? '', focal: g.focalPoint, focalTouched: false })),
       dirty: false,
     };
   }
+  setScreen('editor');
   renderEditor();
 }
 
-function field(label, hint, input, id) {
+function field(label, input, id) {
   return h('div', { class: 'field' },
     h('label', { for: id }, label),
     input,
-    hint ? h('p', { class: 'hint', id: `${id}-hint` }, hint) : null,
   );
 }
 
@@ -278,15 +314,15 @@ function renderEditor() {
   const o = D.original;
   const isNew = !D.slug;
   document.title = `${isNew ? 'New work' : o.title} — arnenys.com admin`;
-  const onInput = () => setDirty(true);
+  const onInput = () => { setDirty(true); renderPreviewText(); };
 
-  const title = h('input', { id: 'f-title', type: 'text', value: o.title, required: true, 'aria-describedby': 'f-title-hint', autocomplete: 'off', oninput: onInput });
-  const year = h('input', { id: 'f-year', type: 'number', inputmode: 'numeric', min: YEAR_MIN, max: YEAR_MAX, step: 1, value: o.year ?? '', 'aria-describedby': 'f-year-hint', oninput: onInput });
-  const dims = h('input', { id: 'f-dimensions', type: 'text', value: o.dimensions ?? '', 'aria-describedby': 'f-dimensions-hint', autocomplete: 'off', oninput: onInput });
-  const medium = h('input', { id: 'f-medium', type: 'text', value: o.medium ?? '', 'aria-describedby': 'f-medium-hint', autocomplete: 'off', oninput: onInput });
-  const desc = h('textarea', { id: 'f-description', rows: 5, 'aria-describedby': 'f-description-hint', oninput: onInput });
+  const title = h('input', { id: 'f-title', type: 'text', value: o.title, required: true, autocomplete: 'off', oninput: onInput });
+  const year = h('input', { id: 'f-year', type: 'number', inputmode: 'numeric', min: YEAR_MIN, max: YEAR_MAX, step: 1, value: o.year ?? '', oninput: onInput });
+  const dims = h('input', { id: 'f-dimensions', type: 'text', value: o.dimensions ?? '', placeholder: '120 × 90 cm', autocomplete: 'off', oninput: onInput });
+  const medium = h('input', { id: 'f-medium', type: 'text', value: o.medium ?? '', autocomplete: 'off', oninput: onInput });
+  const desc = h('textarea', { id: 'f-description', rows: 5, oninput: onInput });
   desc.value = o.description ?? '';
-  const order = h('input', { id: 'f-order', type: 'number', inputmode: 'numeric', step: 1, value: o.order ?? NEW_WORK_ORDER, 'aria-describedby': 'f-order-hint', oninput: onInput });
+  const order = h('input', { id: 'f-order', type: 'number', inputmode: 'numeric', step: 1, value: o.order ?? NEW_WORK_ORDER, oninput: onInput });
 
   const statusOpts = [...STATUS_OPTIONS];
   if (o.status && !statusOpts.some((s) => s.value === o.status)) statusOpts.push({ value: o.status, label: o.status });
@@ -303,51 +339,51 @@ function renderEditor() {
   });
 
   const driveBtn = driveAvailable()
-    ? h('button', { class: 'btn', type: 'button', onclick: addFromDrive }, h('span', { class: 'drive-icon', 'aria-hidden': 'true' }), 'Choose from Google Drive')
+    ? h('button', { class: 'btn', type: 'button', onclick: addFromDrive }, h('span', { class: 'drive-icon', 'aria-hidden': 'true' }), 'Google Drive')
     : null;
 
-  const form = h('form', { class: 'editor', onsubmit: (e) => { e.preventDefault(); saveDraft(); } },
+  const form = h('form', { class: 'editor narrow', onsubmit: (e) => { e.preventDefault(); saveDraft(); } },
     h('a', { class: 'back', href: '#/' }, '← All works'),
     h('h1', {}, isNew ? 'New work' : o.title),
-    !isNew ? h('p', { class: 'lede' }, h('a', { href: `https://www.arnenys.com/artworks/${D.slug}/`, target: '_blank', rel: 'noopener' }, 'See it on the website ↗')) : null,
+    !isNew ? h('p', { class: 'lede' }, h('a', { href: `https://www.arnenys.com/artworks/${D.slug}/`, target: '_blank', rel: 'noopener' }, 'On the website ↗')) : null,
 
     h('section', { class: 'panel' },
-      field('Title', 'The name of the work, as it should appear under the photo.', title, 'f-title'),
+      field('Title', title, 'f-title'),
       h('div', { class: 'row' },
-        field('Year', `The year you made it. This is also what the 2026 / 2025 / 2024 filter uses.`, year, 'f-year'),
-        field('Size', 'Height × width, e.g. 120 × 90 cm. Add a third number for a sculpture: 60 × 55 × 30 cm.', dims, 'f-dimensions'),
+        field('Year', year, 'f-year'),
+        field('Size', dims, 'f-dimensions'),
       ),
-      field('Material', 'What it is made of, e.g. Aluminium, or Plaster relief on panel. Leave empty if you would rather not say.', medium, 'f-medium'),
+      field('Material', medium, 'f-medium'),
       h('div', { class: 'field' },
-        h('span', { class: 'label', id: 'status-label' }, 'Sold?'),
+        h('span', { class: 'label', id: 'status-label' }, 'Status'),
         status,
-        h('p', { class: 'hint' }, "Shown as a line under the year on the work's own page."),
       ),
-      field('About this work', 'Optional. A few sentences shown under the size and year. Leave empty and nothing appears.', desc, 'f-description'),
+      field('About', desc, 'f-description'),
     ),
 
     h('section', { class: 'panel' },
       h('h2', {}, 'Photos'),
-      h('p', { class: 'hint' }, 'The first photo is the one shown in the grid on the home page. Drag to reorder, or use “Make cover”.'),
       photoList,
       notices,
       h('div', { class: 'add-photos' },
         driveBtn,
-        h('button', { class: 'btn', type: 'button', onclick: () => fileInput.click() }, 'Upload from this device'),
+        h('button', { class: 'btn', type: 'button', onclick: () => fileInput.click() }, 'Upload'),
         fileInput,
       ),
-      h('p', { class: 'hint small' }, 'Photos are kept at full quality. Location and camera details are removed before they go online. iPhone (HEIC) photos are converted to high-quality JPEG. Up to 20 MB each.'),
     ),
 
+    h('section', { class: 'panel', id: 'crop-panel', 'aria-labelledby': 'crop-title' }),
+
     h('section', { class: 'panel' },
-      field('Position in the grid', 'Lower numbers come first. A new work starts at −1 so it appears at the front — only change this if you want to move it. (Dragging in the list of works does this for you.)', order, 'f-order'),
+      field('Position', order, 'f-order'),
     ),
 
     !isNew ? h('section', { class: 'panel danger-zone' },
-      h('h2', {}, 'Delete this work'),
-      h('p', { class: 'hint' }, 'Removes the work and its photos from the website. This cannot be undone here.'),
+      h('h2', {}, 'Delete'),
       h('button', { class: 'btn danger', type: 'button', onclick: deleteWork }, `Delete “${o.title}”`),
     ) : null,
+
+    h('p', { class: 'preview-link' }, h('a', { href: '#page-preview', onclick: (e) => { e.preventDefault(); document.getElementById('page-preview').scrollIntoView({ behavior: 'smooth' }); } }, 'Preview ↓')),
 
     h('div', { class: 'action-bar' },
       h('span', { id: 'save-state', class: 'save-state' }, D.dirty ? 'Not saved yet' : isNew ? 'New — not saved yet' : 'No changes'),
@@ -358,7 +394,7 @@ function renderEditor() {
     ),
   );
 
-  $app().replaceChildren(form);
+  $app().replaceChildren(form, pagePreview());
   renderPhotos();
   Sortable.create(photoList, {
     animation: 150,
@@ -390,12 +426,11 @@ function renderPhotos() {
           i === 0 ? h('span', { class: 'cover-badge' }, 'Cover') : null,
           p.preview ? h('span', { class: 'new-badge' }, p.converted ? 'New · converted' : 'New') : null,
         ),
-        h('label', { class: 'alt-label', for: `alt-${p.key}` }, 'Description of the photo'),
+        h('label', { class: 'alt-label', for: `alt-${p.key}` }, 'Description'),
         h('input', {
-          id: `alt-${p.key}`, type: 'text', value: p.alt, placeholder: 'e.g. The work seen from the side',
+          id: `alt-${p.key}`, type: 'text', value: p.alt,
           oninput: (e) => { p.alt = e.target.value; setDirty(true); },
         }),
-        h('p', { class: 'hint small' }, 'Read aloud to visitors who cannot see the image. One short sentence is plenty.'),
         h('div', { class: 'photo-actions' },
           i > 0 ? h('button', { class: 'btn small', type: 'button', onclick: () => movePhoto(p, 0) }, 'Make cover') : null,
           i > 0 ? h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Move earlier', title: 'Move earlier', onclick: () => movePhoto(p, i - 1) }, '←') : null,
@@ -405,7 +440,186 @@ function renderPhotos() {
       ),
     ),
   );
-  if (!D.photos.length) list.append(h('li', { class: 'photo-empty' }, 'No photos yet. Add one below — the work needs at least one to show in the grid.'));
+  if (!D.photos.length) list.append(h('li', { class: 'photo-empty' }, 'No photos'));
+  renderCrop();
+  renderPreviewPhotos();
+}
+
+// ------------------------------------------------------------ crop editor
+
+
+/** The cover, with the 2:3 grid frame over it, and a live tile beside it. */
+function renderCrop() {
+  const box = document.getElementById('crop-panel');
+  if (!box) return;
+  const p = S.draft.photos[0];
+  const heading = h('h2', { id: 'crop-title' }, 'Crop');
+  box.hidden = !p || p.state === 'working';
+  if (box.hidden) return box.replaceChildren();
+  const url = p.preview || photoUrl(p.src);
+  const img = h('img', { class: 'crop-photo', src: url, alt: 'The cover photo', draggable: 'false' });
+  const frame = h('div', { class: 'crop-frame', tabindex: '0', role: 'slider', 'aria-label': 'Part of the cover shown in the grid' });
+  const stage = h('div', { class: 'crop-stage' }, img, frame);
+  const reset = h('button', { class: 'btn small', type: 'button', onclick: () => setFocal({ x: 0.5, y: 0.5 }) }, 'Reset to centre');
+  const tile = gridFrame(url, p.focal);
+  box.replaceChildren(
+    heading,
+    h('div', { class: 'crop-layout' },
+      h('div', { class: 'crop-main' }, stage, h('div', { class: 'crop-actions' }, reset)),
+      h('div', { class: 'crop-side' },
+        h('div', { class: 'site site-tile' }, tile, h('span', { class: 'site-caption', 'data-live': 'title' }, currentTitle())),
+      ),
+    ),
+  );
+
+  let w = 0;
+  let ht = 0;
+  let axis = null;
+  const centred = () => (p.focal?.x ?? 0.5) === 0.5 && (p.focal?.y ?? 0.5) === 0.5;
+  function update() {
+    Object.assign(frame.style, framePlacement(gridCrop(w, ht, p.focal), w, ht));
+    tile.place(p.focal);
+    if (!axis) return;
+    const v = Math.round((p.focal?.[axis] ?? 0.5) * 100);
+    frame.setAttribute('aria-valuenow', String(v));
+    frame.setAttribute('aria-valuetext', v === 50 ? 'Centred' : axis === 'x' ? `${v}% of the way from left to right` : `${v}% of the way from top to bottom`);
+    reset.disabled = centred();
+  }
+  function setFocal(f) {
+    if ((p.focal?.x ?? 0.5) === f.x && (p.focal?.y ?? 0.5) === f.y && p.focal) return;
+    if (!p.focal && f.x === 0.5 && f.y === 0.5) return; // still centred
+    p.focal = f;
+    p.focalTouched = true;
+    update();
+    setDirty(true);
+  }
+
+  function ready() {
+    w = img.naturalWidth;
+    ht = img.naturalHeight;
+    if (!w || !ht) return;
+    axis = cropAxis(w, ht);
+    stage.dataset.axis = axis || 'none';
+    reset.hidden = !axis;
+    frame.hidden = !axis; // 2:3 already: no crop, no frame
+    if (axis) {
+      frame.setAttribute('aria-orientation', axis === 'x' ? 'horizontal' : 'vertical');
+      frame.setAttribute('aria-valuemin', '0');
+      frame.setAttribute('aria-valuemax', '100');
+    } else {
+      frame.removeAttribute('role');
+      frame.removeAttribute('tabindex');
+    }
+    update();
+  }
+  img.addEventListener('load', ready);
+  if (img.complete) ready();
+
+  // Drag the frame to move it. A tap or click anywhere on the photo centres
+  // the frame on that spot (outside the frame it does so at once, so a drag
+  // can follow). Pointer events cover mouse, pen and touch.
+  let drag = null;
+  const centreOn = (e, box, scale) =>
+    setFocal(focalCentredOn(w, ht, axis, (e.clientX - box.left) * scale, (e.clientY - box.top) * scale, p.focal));
+  stage.addEventListener('pointerdown', (e) => {
+    if (!axis || e.button > 0) return;
+    e.preventDefault();
+    const box = stage.getBoundingClientRect();
+    const scale = w / box.width; // photo pixels per screen pixel
+    const onFrame = e.target === frame;
+    if (!onFrame) centreOn(e, box, scale);
+    const r = gridCrop(w, ht, p.focal);
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, edge: axis === 'x' ? r.left : r.top, scale, box, onFrame, moved: false };
+    stage.setPointerCapture(e.pointerId);
+    stage.classList.add('dragging');
+    frame.focus({ preventScroll: true });
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const moved = axis === 'x' ? e.clientX - drag.x : e.clientY - drag.y;
+    if (Math.abs(moved) > 3) drag.moved = true;
+    if (drag.moved) setFocal(focalFromEdge(w, ht, axis, drag.edge + moved * drag.scale, p.focal));
+  });
+  const stop = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (e.type === 'pointerup' && drag.onFrame && !drag.moved) centreOn(e, drag.box, drag.scale);
+    drag = null;
+    stage.classList.remove('dragging');
+  };
+  stage.addEventListener('pointerup', stop);
+  stage.addEventListener('pointercancel', stop);
+
+  frame.addEventListener('keydown', (e) => {
+    if (!axis) return;
+    const now = p.focal?.[axis] ?? 0.5;
+    const step = e.shiftKey ? 0.1 : 0.01;
+    const keys = {
+      ArrowLeft: now - step, ArrowUp: now - step, ArrowRight: now + step, ArrowDown: now + step,
+      PageUp: now - 0.1, PageDown: now + 0.1, Home: 0, End: 1,
+    };
+    if (!(e.key in keys)) return;
+    e.preventDefault();
+    setFocal(withAxis(p.focal, axis, keys[e.key]));
+  });
+}
+
+// ------------------------------------------------------- page preview
+
+function currentTitle() {
+  return document.getElementById('f-title')?.value.trim() || S.draft?.original.title || 'Untitled';
+}
+
+/**
+ * The work's own page as the site renders it (src/pages/artworks/[entry].astro):
+ * every photo at its full shape, then the title, the caption lines and the text.
+ */
+function pagePreview() {
+  return h('section', { class: 'page-preview', id: 'page-preview', 'aria-labelledby': 'preview-title' },
+    h('div', { class: 'narrow preview-head' }, h('h2', { id: 'preview-title' }, 'Preview')),
+    h('div', { class: 'site sage' },
+      h('nav', { class: 'site-crumbs site-wrap', 'aria-hidden': 'true' },
+        h('span', {}, 'Artworks'), h('span', {}, '›'), h('span', { 'data-live': 'title' }, '')),
+      h('div', { class: 'site-work site-wrap' },
+        h('div', { class: 'site-plates', id: 'preview-plates' }),
+        h('div', { class: 'site-details', id: 'preview-details' }),
+      ),
+    ),
+  );
+}
+
+/** The values as typed, tidied the way saving tidies them. */
+function liveValues() {
+  const val = (id) => document.getElementById(id)?.value.trim() ?? '';
+  const year = val('f-year');
+  return {
+    title: val('f-title'),
+    year: year && Number.isFinite(Number(year)) ? String(Number(year)) : year,
+    dimensions: val('f-dimensions'),
+    medium: val('f-medium'),
+    status: document.querySelector('input[name=status]:checked')?.value ?? '',
+    description: val('f-description'),
+  };
+}
+
+function renderPreviewText() {
+  const details = document.getElementById('preview-details');
+  if (!details) return;
+  const v = liveValues();
+  const lines = [v.dimensions, v.medium, v.year, v.status].filter(Boolean);
+  details.replaceChildren(
+    h('p', { class: 'site-h1' }, v.title),
+    ...lines.map((line) => h('p', { class: 'site-line' }, line)),
+    v.description ? h('p', { class: 'site-blurb' }, v.description) : null,
+  );
+  for (const el of document.querySelectorAll('[data-live=title]')) el.textContent = v.title || 'Untitled';
+}
+
+function renderPreviewPhotos() {
+  const plates = document.getElementById('preview-plates');
+  if (!plates) return;
+  const ready = S.draft.photos.filter((p) => p.state !== 'working' && (p.src || p.preview));
+  plates.replaceChildren(...ready.map((p) => h('img', { src: p.preview || photoUrl(p.src), alt: '', loading: 'lazy', decoding: 'async' })));
+  renderPreviewText();
 }
 
 function movePhoto(p, to) {
@@ -492,7 +706,13 @@ function readDraft() {
     medium: text('f-medium', o.medium),
     dimensions: text('f-dimensions', o.dimensions),
     status: document.querySelector('input[name=status]:checked')?.value ?? '',
-    gallery: D.photos.map((p) => ({ src: p.src || `new:${p.key}`, alt: p.src && p.alt === (o.gallery?.find((g) => g.src === p.src)?.alt ?? '') ? p.alt : p.alt.trim() })),
+    gallery: D.photos.map((p) => {
+      const item = { src: p.src || `new:${p.key}`, alt: p.src && p.alt === (o.gallery?.find((g) => g.src === p.src)?.alt ?? '') ? p.alt : p.alt.trim() };
+      // Only a crop Arne changed is sent; the server leaves the rest as stored
+      // (and leaves a centred crop out of a photo that never had one).
+      if (p.focalTouched) item.focalPoint = p.focal ?? null;
+      return item;
+    }),
   };
   if (o.year === null && yearRaw === '') data.year = null;
   const problems = [];
@@ -571,14 +791,14 @@ async function runSave(payload, what, after) {
     const res = await api('/api/save', { method: 'POST', body: JSON.stringify(payload) });
     if (res.dryRun) {
       const n = res.files?.length || 0;
-      toast(`Test mode: nothing was published. Saving ${what} would have changed ${n} file${n === 1 ? '' : 's'}.`, 'test');
+      toast(`Test mode: not published (${n} file${n === 1 ? '' : 's'}).`, 'test');
       console.info('Dry run', res);
       S.busy = false;
       setBusy(false);
       return;
     }
     if (res.noop) {
-      toast('There was nothing new to save.', 'ok', 5000);
+      toast('No changes.', 'ok', 5000);
       S.busy = false;
       setBusy(false);
       if (S.draft) setDirty(false);
@@ -588,7 +808,7 @@ async function runSave(payload, what, after) {
     S.busy = false;
     setBusy(false);
     after(res);
-    toast('Saved — it will be live on arnenys.com in a few minutes.', 'ok', 12000);
+    toast('Saved — live in a few minutes.', 'ok', 12000);
   } catch (e) {
     S.busy = false;
     setBusy(false);

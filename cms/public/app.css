@@ -1,3 +1,21 @@
+/* The website's fonts, self-hosted (from @fontsource, SIL OFL; licences in
+   /fonts). Used only where the editor shows how the site will look. */
+@font-face {
+  font-family: 'Libre Baskerville'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/libre-baskerville-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Libre Baskerville'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/libre-baskerville-latin-ext-400-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Almarai'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/fonts/almarai-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
 /* Calm, large and readable: this is used by an artist, not a developer.
    Colours are the site's own (src/styles/global.css). */
 :root {
@@ -43,7 +61,11 @@ h2 { font-size: 1.35rem; margin: 0 0 0.4em; }
 .user { color: var(--muted); font-size: 0.9rem; }
 .test-banner { background: var(--test-bg); color: var(--test); padding: 10px 20px; font-size: 0.95rem; text-align: center; }
 
-main { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
+main { padding: 20px 0; }
+/* Forms and headings stay a comfortable reading width; the grid and the page
+   preview use the full window, as the website does. */
+.narrow { max-width: 860px; margin-inline: auto; padding-inline: 16px; }
+.panel.narrow { max-width: 828px; }
 .lede { color: var(--muted); margin: 0 0 1em; }
 .loading { padding: 60px 0; text-align: center; color: var(--muted); }
 
@@ -55,7 +77,7 @@ main { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
   font: inherit; font-size: 1rem; text-decoration: none; cursor: pointer;
 }
 .btn:hover { border-color: var(--olive); }
-.btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, textarea:focus-visible, .work-open:focus-visible {
+.btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, textarea:focus-visible, .tile-link:focus-visible, .crop-frame:focus-visible {
   outline: 3px solid #b7ae86; outline-offset: 2px;
 }
 .btn.primary { background: var(--olive); border-color: var(--olive); color: #fff; }
@@ -70,28 +92,9 @@ main { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
 }
 .icon-btn:hover { border-color: var(--line); color: var(--ink); }
 
-/* list of works */
+/* list of works: the home page grid (see "The website's look" below) */
 .list-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
 .list-head > div { flex: 1 1 320px; }
-.handle-inline { font-size: 1.1em; }
-.works { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
-.work {
-  display: flex; align-items: center; gap: 4px;
-  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px;
-}
-.handle { cursor: grab; padding: 12px 6px; color: #a59a90; font-size: 1.4rem; touch-action: none; user-select: none; }
-.work-open {
-  flex: 1; display: flex; align-items: center; gap: 14px; min-width: 0;
-  background: none; border: 0; padding: 4px; text-align: left; font: inherit; color: inherit; cursor: pointer; border-radius: 8px;
-}
-.thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; background: var(--olive-soft); flex: none; }
-.thumb.empty { display: grid; place-items: center; font-size: 0.7rem; color: var(--muted); }
-.work-text { display: flex; flex-direction: column; min-width: 0; }
-.work-title { font-family: var(--serif); font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.work-meta { color: var(--muted); font-size: 0.9rem; }
-.badge { align-self: flex-start; margin-top: 2px; font-size: 0.8rem; padding: 1px 8px; border-radius: 99px; background: var(--olive-soft); color: var(--olive); }
-.badge.sold { background: #efe0dc; color: #7c3a2c; }
-.move { display: flex; flex-direction: column; }
 .drag-ghost { opacity: 0.4; }
 
 /* editor */
@@ -167,7 +170,6 @@ body.busy { cursor: progress; }
   .row { grid-template-columns: 1fr; gap: 0; }
   .row .field { margin-bottom: 20px; }
   .panel { padding: 16px; }
-  .thumb { width: 60px; height: 60px; }
   .photos { grid-template-columns: 1fr; }
   .list-head .btn { width: 100%; }
   .user { width: 100%; }
@@ -181,3 +183,115 @@ body.busy { cursor: progress; }
   transform: translate(-50%, -50%); max-width: calc(100vw - 16px); max-height: calc(100vh - 16px);
 }
 .picker-dialog-content, .picker-dialog-content iframe { max-width: calc(100vw - 16px) !important; }
+
+/* ------------------------------------------------------------------
+   The website's look: the home grid and the work page, copied from
+   src/styles/global.css, src/components/ArtworkGrid.astro and
+   src/pages/artworks/[entry].astro. Keep them in step with those files.
+   ------------------------------------------------------------------ */
+:root {
+  --site-cream: #f1eeec;
+  --site-sage: #a7a489;
+  --site-ink: #191713;
+  --site-serif: 'Libre Baskerville', 'Times New Roman', serif;
+  --site-sans: 'Almarai', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --site-gutter: 1.5vw;
+  --site-gap: 2vw;
+}
+@media (max-width: 767px) {
+  :root { --site-gutter: 6vw; --site-gap: 4vw; }
+}
+.site {
+  background: var(--site-cream);
+  color: var(--site-ink);
+  font-family: var(--site-sans);
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+.site img { display: block; max-width: 100%; height: auto; }
+.site-wrap { padding-inline: var(--site-gutter); }
+body[data-screen='list'] { background: var(--site-cream); }
+.site-home { padding-top: 12px; }
+
+/* The grid */
+.site-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--site-gap); }
+@media (max-width: 767px) { .site-grid { grid-template-columns: 1fr; } }
+.site-frame { position: relative; aspect-ratio: 2 / 3; overflow: hidden; background: color-mix(in srgb, currentColor 6%, transparent); }
+/* Until the photo's size is known: a plain centred cover. Then (.placed) the
+   exact crop rectangle, set inline from src/lib/crop.js. */
+.site .site-frame img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.site .site-frame img.placed { object-fit: fill; }
+.site-frame.empty { display: grid; place-items: center; color: var(--muted); font-size: 0.9rem; }
+.site-caption {
+  display: block; margin-top: 1.375rem;
+  font-family: var(--site-serif); font-size: 0.858rem; line-height: 1.2; letter-spacing: -0.02em; color: #000;
+}
+.tile { position: relative; cursor: grab; }
+.tile-link { display: block; color: inherit; text-decoration: none; border-radius: 2px; }
+.tile .site-caption { padding-right: 80px; }
+/* Move buttons sit on the caption line, so the grid keeps the site's spacing. */
+.tile-tools { position: absolute; right: 0; bottom: -10px; display: flex; }
+.tile-tools .icon-btn { min-width: 36px; min-height: 36px; font-size: 1rem; color: #8a7d73; }
+.tile-tools .icon-btn:disabled { visibility: hidden; }
+.move-earlier::before { content: '←'; }
+.move-later::before { content: '→'; }
+@media (max-width: 767px) {
+  .move-earlier::before { content: '↑'; }
+  .move-later::before { content: '↓'; }
+}
+.tile.drag-ghost { opacity: 0.35; }
+.sortable-chosen .site-frame { outline: 3px solid #b7ae86; outline-offset: 2px; }
+
+/* The crop editor */
+.crop-layout { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 24px; align-items: start; }
+.crop-stage {
+  position: relative; display: block; width: fit-content; max-width: 100%; margin: 4px 0 0;
+  overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; background: var(--olive-soft);
+}
+/* A wide photo only moves sideways, so a finger can still scroll the page up and down over it. */
+.crop-stage[data-axis='x'] { touch-action: pan-y; }
+.crop-photo { display: block; max-width: 100%; max-height: min(70vh, 640px); width: auto; height: auto; pointer-events: none; }
+.crop-frame {
+  position: absolute; box-sizing: border-box;
+  border: 2px solid #fff; outline: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 9999px rgba(25, 23, 19, 0.55);
+}
+.crop-stage[data-axis='x'] .crop-frame { cursor: ew-resize; }
+.crop-stage[data-axis='y'] .crop-frame { cursor: ns-resize; }
+.crop-stage[data-axis='x'], .crop-stage[data-axis='y'] { cursor: pointer; }
+.crop-stage[data-axis='none'] .crop-frame { box-shadow: none; border-color: transparent; outline: 0; }
+.crop-stage.dragging .crop-frame { border-color: #ffe9a8; }
+.crop-frame:focus-visible { outline: 3px solid #ffe9a8; outline-offset: 0; }
+.crop-actions { margin-top: 10px; }
+.crop-side .label { margin-bottom: 8px; }
+.site-tile { padding: 12px; border-radius: 6px; }
+.site-tile .site-caption { margin-top: 0.9rem; }
+@media (max-width: 600px) {
+  .crop-layout { grid-template-columns: 1fr 120px; gap: 14px; }
+  .crop-photo { max-height: 55vh; }
+}
+
+/* The work page preview */
+.preview-link { margin: 8px 0 0; font-size: 1rem; }
+.page-preview { margin-top: 28px; }
+.preview-head { margin-bottom: 12px; }
+.site.sage { background: var(--site-sage); color: var(--site-cream); padding-bottom: 48px; }
+.site-crumbs { display: flex; gap: 0.55rem; padding-top: clamp(1.5rem, 3vw, 3rem); }
+.site-work { display: grid; grid-template-columns: 65% minmax(0, 1fr); gap: var(--site-gap); align-items: start; padding-top: 22px; }
+.site-plates { display: grid; gap: var(--site-gap); }
+.site-plates img { width: 100%; }
+.site-details { text-align: center; position: sticky; top: 20px; }
+.site-h1 {
+  margin: 0; color: var(--site-cream); font-family: var(--site-serif); font-weight: 400;
+  font-size: clamp(1.6rem, 3.233vw, 3.6rem); line-height: 1.2; letter-spacing: -0.02em;
+}
+.site-line { margin: 0; padding-top: 12px; color: var(--site-cream); }
+.site-h1 + .site-line { padding-top: 22px; }
+.site-blurb { margin: 1.75rem auto 0; max-width: 34ch; }
+@media (max-width: 900px) {
+  .site-work { grid-template-columns: 1fr; gap: clamp(1.25rem, 4vw, 2rem); }
+  .site-details { order: -1; position: static; }
+}

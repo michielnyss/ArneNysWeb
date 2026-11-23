@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node build.mjs",
     "dev": "wrangler dev -c wrangler.local.jsonc --port 8787",
+    "dev:mock": "node build.mjs && node test/mock-server.mjs",
     "test": "node --test \"test/**/*.test.mjs\"",
     "check-schema": "node test/schema-check.mjs",
     "deploy": "node build.mjs && wrangler deploy"

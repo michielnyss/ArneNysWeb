@@ -129,3 +129,105 @@ test('slugs and photo names', () => {
   assert.equal(nextImageName(['01.jpg', '03.jpg', 'x.png'], 'jpg'), '04.jpg');
   assert.equal(nextImageName([], 'png'), '01.png');
 });
+
+// ---- the crop centre (focalPoint) and the commit summary
+
+const save = (s, slug, edit) => {
+  const data = editableView(JSON.parse(s.works[slug].text));
+  edit(data);
+  return planSave(s, { works: [{ slug, baseSha: s.works[slug].sha, data }] }, user);
+};
+const written = (plan, slug) => JSON.parse(plan.entries.find((e) => e.path === `src/content/artworks/${slug}.json`).content);
+
+/** The snapshot with every focalPoint of one work removed, as a work saved before crops existed. */
+function withoutFocal(slug) {
+  const s = structuredClone(snap);
+  const d = JSON.parse(s.works[slug].text);
+  for (const g of d.gallery) delete g.focalPoint;
+  s.works[slug] = { sha: 'nofocal', text: serializeWork(d) };
+  return s;
+}
+
+test('a moved crop is written as {x, y} on that photo only, in place', () => {
+  const plan = save(snap, 'avondwind', (d) => { d.gallery[0].focalPoint = { x: 0.2731, y: 0.5 }; });
+  const before = JSON.parse(snap.works.avondwind.text);
+  const out = written(plan, 'avondwind');
+  assert.deepEqual(out.gallery[0], { ...before.gallery[0], focalPoint: { x: 0.2731, y: 0.5 } });
+  assert.deepEqual(Object.keys(out.gallery[0]), Object.keys(before.gallery[0]));
+  assert.deepEqual(out.gallery.slice(1), before.gallery.slice(1));
+  assert.equal(plan.entries.length, 1);
+  assert.match(plan.message, /- "Avondwind": Changed: crop of cover\n/);
+});
+
+test('sending the stored crop back unchanged is a no-op, also for the float values Sveltia wrote', () => {
+  for (const slug of slugs) {
+    const plan = save(snap, slug, (d) => {
+      const stored = JSON.parse(snap.works[slug].text).gallery;
+      d.gallery.forEach((g, i) => { if (stored[i].focalPoint) g.focalPoint = { ...stored[i].focalPoint }; });
+    });
+    assert.equal(plan.noop, true, slug);
+  }
+});
+
+test('a centred crop is left out of a photo that had none; an off-centre one is added', () => {
+  const s = withoutFocal('avondwind');
+  const plan = planSave(s, { works: [{ slug: 'avondwind', baseSha: 'nofocal', data: { ...editableView(JSON.parse(s.works.avondwind.text)), gallery: JSON.parse(s.works.avondwind.text).gallery.map((g) => ({ ...g, focalPoint: { x: 0.5, y: 0.5 } })) } }] }, user);
+  assert.equal(plan.noop, true, 'reset to centre on a photo without a crop changes nothing');
+
+  const d = editableView(JSON.parse(s.works.avondwind.text));
+  d.gallery[0].focalPoint = { x: 0.8, y: 0.5 };
+  const out = written(planSave(s, { works: [{ slug: 'avondwind', baseSha: 'nofocal', data: d }] }, user), 'avondwind');
+  assert.deepEqual(Object.keys(out.gallery[0]), ['src', 'alt', 'focalPoint']);
+  assert.deepEqual(out.gallery[0].focalPoint, { x: 0.8, y: 0.5 });
+  assert.ok(!('focalPoint' in out.gallery[1]));
+});
+
+test('reset to centre on a photo that had a crop writes the centre; null removes it', () => {
+  const orig = JSON.parse(snap.works.avondwind.text);
+  const i = orig.gallery.findIndex((g) => g.focalPoint && (g.focalPoint.x !== 0.5 || g.focalPoint.y !== 0.5));
+  const slug = i >= 0 ? 'avondwind' : slugs.find((s) => JSON.parse(snap.works[s].text).gallery.some((g) => g.focalPoint?.x !== 0.5));
+  const src = JSON.parse(snap.works[slug].text);
+  const k = src.gallery.findIndex((g) => g.focalPoint && (g.focalPoint.x !== 0.5 || g.focalPoint.y !== 0.5));
+  const out = written(save(snap, slug, (d) => { d.gallery[k].focalPoint = { x: 0.5, y: 0.5 }; }), slug);
+  assert.deepEqual(out.gallery[k].focalPoint, { x: 0.5, y: 0.5 });
+  const gone = written(save(snap, slug, (d) => { d.gallery[k].focalPoint = null; }), slug);
+  assert.ok(!('focalPoint' in gone.gallery[k]));
+});
+
+test('a new photo keeps an off-centre crop, and a malformed crop is refused', () => {
+  const slug = 'avondwind';
+  const data = editableView(JSON.parse(snap.works[slug].text));
+  data.gallery.unshift({ src: 'new:5', alt: '', focalPoint: { x: 0.1, y: 0.5 } });
+  data.gallery.push({ src: 'new:6', alt: '', focalPoint: { x: 0.5, y: 0.5 } });
+  const newImages = { 5: { sha: 'c'.repeat(40), ext: 'jpg' }, 6: { sha: 'd'.repeat(40), ext: 'jpg' } };
+  const plan = planSave(snap, { works: [{ slug, baseSha: snap.works[slug].sha, data, newImages }] }, user);
+  const out = written(plan, slug);
+  assert.deepEqual(out.gallery[0], { src: '/src/assets/artworks/avondwind/04.jpg', alt: '', focalPoint: { x: 0.1, y: 0.5 } });
+  assert.deepEqual(out.gallery.at(-1), { src: '/src/assets/artworks/avondwind/05.jpg', alt: '' });
+  assert.match(plan.message, /- "Avondwind": Changed: cover photo; added 2 photos\n/);
+  for (const fp of [{ x: 2, y: 0.5 }, { x: '0.5', y: 0.5 }, { x: 0.5 }, 'centre', 7]) {
+    const bad = editableView(JSON.parse(snap.works[slug].text));
+    bad.gallery[0].focalPoint = fp;
+    assert.throws(() => planSave(snap, { works: [{ slug, baseSha: snap.works[slug].sha, data: bad }] }, user), SaveError, JSON.stringify(fp));
+  }
+});
+
+test('the commit message says what changed', () => {
+  const slug = 'avondwind';
+  const msg = (edit) => save(snap, slug, edit).message;
+  const withPhotos = save(snap, slug, (d) => { d.title = 'Avondwind II'; d.gallery[0].focalPoint = { x: 0.3, y: 0.5 }; });
+  assert.match(withPhotos.message, /^Update "Avondwind II"\n\nSaved by Test Person in admin\.arnenys\.com\.\n\n- "Avondwind II": Changed: title, crop of cover\n$/);
+  assert.match(msg((d) => { d.year = 2001; d.dimensions = '1 × 1 cm'; d.medium = 'Oil'; d.status = 'Sold'; d.description = 'x'; }),
+    /: Changed: year, size, material, sold status, description\n/);
+  assert.match(msg((d) => { d.gallery = [d.gallery[0], d.gallery[2], d.gallery[1]]; }), /: Changed: photo order\n/);
+  assert.match(msg((d) => { d.gallery = [d.gallery[1], d.gallery[0], d.gallery[2]]; }), /: Changed: cover photo\n/);
+  assert.match(msg((d) => { d.gallery[1].alt = 'a'; d.gallery[2].alt = 'b'; }), /: Changed: 2 photo descriptions\n/);
+  assert.match(msg((d) => { d.gallery[2].focalPoint = { x: 0.1, y: 0.1 }; }), /: Changed: crop of 1 other photo\n/);
+  assert.match(msg((d) => { d.gallery.pop(); }), /: removed 1 photo\n/);
+  assert.match(msg((d) => { d.order = 99; d.title = 'X'; }), /: Changed: title, position\n/);
+  // New works and plain moves keep their short lines.
+  const add = planSave(snap, { works: [{ slug: null, baseSha: null, data: { title: 'Nieuw', gallery: [{ src: 'new:1', alt: '' }] }, newImages: { 1: { sha: 'c'.repeat(40), ext: 'jpg' } } }] }, user);
+  assert.match(add.message, /\n- added "Nieuw" \(1 photo\)\n$/);
+  const move = planSave(snap, { works: [{ slug, baseSha: snap.works[slug].sha, data: { order: 1234 } }] }, user);
+  assert.match(move.message, /^Reorder works\n[\s\S]*\n- moved "Avondwind"\n$/);
+});

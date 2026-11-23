@@ -1,7 +1,8 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { cropWidth, widthsUpTo } from '../lib/images';
+import { widthsUpTo } from '../lib/images';
+import { focusPosition, gridImageSize } from '../lib/crop.js';
 
 interface Props {
   artworks: CollectionEntry<'artworks'>[];
@@ -17,8 +18,8 @@ const { artworks } = Astro.props;
       // its focal point) and every pixel served is a pixel shown. `sizes` is
       // then simply the frame width: one column of four, or the full column
       // below 768px. 2040px covers a 3x phone and a 2x tablet.
-      const width = cover && Math.min(cropWidth(cover.src, 2 / 3), 2040);
-      const focus = cover?.focalPoint ?? { x: 0.5, y: 0.5 };
+      // gridImageSize (src/lib/crop.js) is also what the admin editor uses.
+      const size = cover && gridImageSize(cover.src.width, cover.src.height);
       return (
         <li>
           <a href={`/artworks/${work.id}/`}>
@@ -27,11 +28,11 @@ const { artworks } = Astro.props;
                 <Image
                   src={cover.src}
                   alt={cover.alt || work.data.title}
-                  width={width}
-                  height={Math.round(width * 1.5)}
+                  width={size.width}
+                  height={size.height}
                   fit="cover"
-                  position={`${+(focus.x * 100).toFixed(2)}% ${+(focus.y * 100).toFixed(2)}%`}
-                  widths={widthsUpTo(width)}
+                  position={focusPosition(cover.focalPoint)}
+                  widths={widthsUpTo(size.width)}
                   sizes="(max-width: 767px) 88vw, 23vw"
                   loading="lazy"
                 />

@@ -12,7 +12,7 @@ export const EDITABLE = ['title', 'year', 'order', 'description', 'medium', 'dim
 
 /** The status choices offered in config.yml. Any other existing value is kept as-is. */
 export const STATUS_OPTIONS = [
-  { value: '', label: 'Available — show nothing' },
+  { value: '', label: 'Available' },
   { value: 'Sold', label: 'Sold' },
   { value: 'Reserved', label: 'Reserved' },
 ];
@@ -122,12 +122,34 @@ function mergeGallery(origItems, editedItems) {
   const bySrc = new Map(origItems.map((it) => [it.src, it]));
   return editedItems.map((e) => {
     const o = bySrc.get(e.src);
-    if (!o) return { src: e.src, alt: e.alt ?? '' };
+    // e.focalPoint: undefined keeps what is stored, null removes it, {x, y} sets it.
+    const fp = e.focalPoint;
+    if (!o) {
+      const item = { src: e.src, alt: e.alt ?? '' };
+      if (fp && !isCentred(fp)) item.focalPoint = { x: fp.x, y: fp.y };
+      return item;
+    }
     const item = {};
-    for (const k of Object.keys(o)) item[k] = k === 'alt' ? e.alt ?? '' : o[k];
+    for (const k of Object.keys(o)) {
+      if (k === 'alt') item.alt = e.alt ?? '';
+      else if (k === 'focalPoint' && fp !== undefined) {
+        if (fp) item.focalPoint = samePoint(o.focalPoint, fp) ? o.focalPoint : { x: fp.x, y: fp.y };
+      } else item[k] = o[k];
+    }
     if (!('alt' in item) && e.alt) item.alt = e.alt;
+    // A photo that had no crop centre only gets one if it is off-centre, so
+    // opening the crop editor and leaving it centred changes nothing.
+    if (fp && !('focalPoint' in o) && !isCentred(fp)) item.focalPoint = { x: fp.x, y: fp.y };
     return item;
   });
+}
+
+const isCentred = (p) => p.x === 0.5 && p.y === 0.5;
+export const samePoint = (a, b) => (a ?? null) === (b ?? null) || (!!a && !!b && a.x === b.x && a.y === b.y);
+
+/** A focalPoint as the editor sends it: null, or {x, y} with both in 0-1. */
+export function validFocalPoint(p) {
+  return p === null || (!!p && typeof p === 'object' && [p.x, p.y].every((v) => typeof v === 'number' && v >= 0 && v <= 1));
 }
 
 /** Just the editable values, for handing to the UI. */

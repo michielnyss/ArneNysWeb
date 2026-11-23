@@ -10,14 +10,15 @@
  *    knows gravity keywords (centre, north, ...), which cannot express the
  *    artworks' `focalPoint`. The grid uses this to serve each cover already
  *    cropped to its 2:3 frame, so no pixels are downloaded only to be hidden.
+ *    The crop rectangle comes from ./crop.js, which the admin editor (cms/)
+ *    also uses to show Arne the exact crop.
  */
 import type { ImageTransform, LocalImageService } from 'astro';
 import sharpService from 'astro/assets/services/sharp';
 import sharp from 'sharp';
+import { cropRect, parsePosition } from './crop.js';
 
 export const QUALITY = 90;
-
-const PERCENT_POSITION = /^(\d+(?:\.\d+)?)% (\d+(?:\.\d+)?)%$/;
 
 const service: LocalImageService = {
   ...sharpService,
@@ -29,8 +30,7 @@ const service: LocalImageService = {
 
   async transform(input, transform, imageConfig) {
     const t = transform as ImageTransform & { width?: number; height?: number };
-    const focus =
-      t.fit === 'cover' && typeof t.position === 'string' ? PERCENT_POSITION.exec(t.position) : null;
+    const focus = t.fit === 'cover' ? parsePosition(t.position) : null;
     if (!focus || !t.width || !t.height || !t.format || t.format === 'svg') {
       return sharpService.transform(input, transform, imageConfig);
     }
@@ -39,14 +39,10 @@ const service: LocalImageService = {
     const { autoOrient } = await image.metadata();
     const { width: srcW, height: srcH } = autoOrient;
 
-    // The largest region of the target aspect ratio that fits the source.
+    // The largest region of the target aspect ratio that fits the source,
+    // placed the way CSS object-position would place it.
     const ratio = t.width / t.height;
-    const cropW = srcW / srcH > ratio ? Math.round(srcH * ratio) : srcW;
-    const cropH = srcW / srcH > ratio ? srcH : Math.round(srcW / ratio);
-    // Same arithmetic as CSS object-position: x% puts the x% point of the
-    // image on the x% point of the frame.
-    const left = Math.round(((srcW - cropW) * Number(focus[1])) / 100);
-    const top = Math.round(((srcH - cropH) * Number(focus[2])) / 100);
+    const { left, top, width: cropW, height: cropH } = cropRect(srcW, srcH, ratio, focus.x, focus.y);
 
     // Never upscale: a request wider than the crop gets the crop at full size.
     const outW = Math.min(Math.round(t.width), cropW);

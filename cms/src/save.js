@@ -4,7 +4,7 @@
 
 import {
   assetSrc, mergeWork, newWorkData, nextImageName, serializeWork, slugify, srcToRepoPath,
-  uniqueSlug, validateWork, workPath, REPO_ASSET_DIR, IMAGE_EXT,
+  samePoint, uniqueSlug, validateWork, validFocalPoint, workPath, REPO_ASSET_DIR, IMAGE_EXT,
 } from '../shared/artwork.js';
 
 export class SaveError extends Error {
@@ -107,6 +107,7 @@ export function planSave(snapshot, req, user) {
       slug: u.slug,
       title: u.data.title,
       orderOnly: !u.isNew && onlyOrderChanged(before, u.data),
+      summary: u.isNew ? addedSummary(u.data) : changeSummary(before, u.data),
     });
   }
 
@@ -138,7 +139,14 @@ function sanitizeEdited(d) {
   for (const k of ['description', 'medium', 'dimensions', 'status']) if (k in d) out[k] = String(d[k] ?? '');
   if ('gallery' in d) {
     if (!Array.isArray(d.gallery)) throw new SaveError('Photos are malformed.');
-    out.gallery = d.gallery.map((g) => ({ src: String(g?.src ?? ''), alt: String(g?.alt ?? '') }));
+    out.gallery = d.gallery.map((g) => {
+      const item = { src: String(g?.src ?? ''), alt: String(g?.alt ?? '') };
+      if (g && 'focalPoint' in g) {
+        if (!validFocalPoint(g.focalPoint)) throw new SaveError('The crop of a photo is malformed. Please reload and try again.');
+        item.focalPoint = g.focalPoint && { x: g.focalPoint.x, y: g.focalPoint.y };
+      }
+      return item;
+    });
   }
   return out;
 }
@@ -146,6 +154,53 @@ function sanitizeEdited(d) {
 function onlyOrderChanged(a, b) {
   const strip = ({ order, ...rest }) => JSON.stringify(rest);
   return strip(a) === strip(b);
+}
+
+const FIELD_NAMES = {
+  title: 'title', year: 'year', dimensions: 'size', medium: 'material', status: 'sold status',
+  description: 'description', order: 'position',
+};
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/** "3 photos", for a new work. */
+function addedSummary(data) {
+  return plural((data.gallery || []).length, 'photo');
+}
+
+/**
+ * What changed in a work, in words, for the commit message:
+ * "Changed: title, crop of cover; added 2 photos; removed 1 photo".
+ */
+export function changeSummary(before, after) {
+  const changed = [];
+  for (const [k, name] of Object.entries(FIELD_NAMES))
+    if (JSON.stringify(before[k] ?? null) !== JSON.stringify(after[k] ?? null)) changed.push(name);
+
+  const was = before.gallery || [];
+  const now = after.gallery || [];
+  const wasBySrc = new Map(was.map((g) => [g.src, g]));
+  const nowSrcs = new Set(now.map((g) => g.src));
+  const kept = now.filter((g) => wasBySrc.has(g.src));
+  const added = now.length - kept.length;
+  const removed = was.filter((g) => !nowSrcs.has(g.src)).length;
+
+  if (now[0]?.src !== was[0]?.src && now.length) changed.push('cover photo');
+  else {
+    const keptOrder = kept.map((g) => g.src).join();
+    if (keptOrder !== was.filter((g) => nowSrcs.has(g.src)).map((g) => g.src).join()) changed.push('photo order');
+  }
+  const crops = kept.filter((g) => !samePoint(g.focalPoint, wasBySrc.get(g.src).focalPoint));
+  if (crops.some((g) => g === now[0])) changed.push('crop of cover');
+  const otherCrops = crops.filter((g) => g !== now[0]).length;
+  if (otherCrops) changed.push(`crop of ${plural(otherCrops, 'other photo')}`);
+  const alts = kept.filter((g) => (g.alt ?? '') !== (wasBySrc.get(g.src).alt ?? '')).length;
+  if (alts) changed.push(alts === 1 ? 'photo description' : `${alts} photo descriptions`);
+
+  const parts = [];
+  if (changed.length) parts.push(`Changed: ${changed.join(', ')}`);
+  if (added) parts.push(`added ${plural(added, 'photo')}`);
+  if (removed) parts.push(`removed ${plural(removed, 'photo')}`);
+  return parts.join('; ') || 'updated';
 }
 
 export function commitMessage(changed, user) {
@@ -160,7 +215,12 @@ export function commitMessage(changed, user) {
     subject = `${{ add: 'Add', update: 'Update', delete: 'Delete' }[c.action]} ${q(c)}`;
     if (reordered) subject += ' and reorder works';
   } else subject = `Update ${real.length} works`;
-  const lines = changed.filter((c) => !c.orderOnly || !real.length).map((c) =>
-    `- ${c.orderOnly ? 'moved' : c.action === 'add' ? 'added' : c.action === 'delete' ? 'deleted' : 'updated'} ${q(c)}`);
+  const line = (c) => {
+    if (c.orderOnly) return `- moved ${q(c)}`;
+    if (c.action === 'add') return `- added ${q(c)}${c.summary ? ` (${c.summary})` : ''}`;
+    if (c.action === 'delete') return `- deleted ${q(c)}`;
+    return `- ${q(c)}: ${c.summary || 'updated'}`;
+  };
+  const lines = changed.filter((c) => !c.orderOnly || !real.length).map(line);
   return `${subject}\n\nSaved by ${who} in admin.arnenys.com.\n\n${lines.join('\n')}\n`;
 }

@@ -14,10 +14,3 @@ export function widthsUpTo(max: number, min = 320): number[] {
   return [...LADDER.filter((w) => w >= min && w < top * 0.9), top];
 }
 
-/**
- * The width, in source pixels, of the largest crop of an image to `ratio`
- * (width / height): what is left of it inside a frame of that shape.
- */
-export function cropWidth(src: { width: number; height: number }, ratio: number): number {
-  return src.width / src.height > ratio ? Math.round(src.height * ratio) : src.width;
-}
