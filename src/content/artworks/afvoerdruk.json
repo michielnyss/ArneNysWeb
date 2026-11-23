@@ -46,6 +46,10 @@
         "x": 0.5,
         "y": 0.5
       }
+    },
+    {
+      "src": "/src/assets/artworks/afvoerdruk/06.jpg",
+      "alt": "Afvoerdruk — Arne Nys (import test)"
     }
   ],
   "legacySlug": "afvoerdruk"
