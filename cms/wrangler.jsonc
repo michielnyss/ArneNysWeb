@@ -1,0 +1,43 @@
+// The artwork editor at admin.arnenys.com. Separate from the site's own
+// Worker (../wrangler.jsonc); deploy it from this folder with `npm run deploy`.
+// See README.md here for the one-time setup and the list of secrets.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arnenys-admin",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-31",
+
+  "routes": [{ "pattern": "admin.arnenys.com", "custom_domain": true }],
+  // Off on purpose: Cloudflare Access guards admin.arnenys.com only, so a
+  // workers.dev or preview URL would be an unguarded side door. (The Worker
+  // checks the Access assertion itself as well, so it would still refuse.)
+  "workers_dev": false,
+  "preview_urls": false,
+
+  "build": { "command": "node build.mjs", "watch_dir": ["src", "ui", "shared"] },
+
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    // Static files go through the Worker too, so they get the same sign-in check.
+    "run_worker_first": true,
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  },
+
+  "vars": {
+    "GITHUB_REPO": "michielnyss/ArneNysWeb",
+    "GITHUB_BRANCH": "main",
+    // While "true", nothing is written to GitHub: a save only reports what it
+    // would commit. Set to "false" and redeploy to let saves go live.
+    "DRY_RUN": "false",
+    // Cloudflare Access: the team domain and the application's AUD tag (both
+    // public identifiers, from Zero Trust > Access > Applications).
+    "ACCESS_TEAM_DOMAIN": "https://arnenys.cloudflareaccess.com",
+    "ACCESS_AUD": "7b68c41b4eb1583075a1bcf3e1c563500e9b6487ea4a9d0911cbdf9bfc422860"
+  }
+  // Secrets (set with `npx wrangler secret put NAME`, never in this file):
+  //   GH_APP_ID, GH_APP_PRIVATE_KEY      the arnenys-admin GitHub App
+  //   GOOGLE_CLIENT_ID, GOOGLE_API_KEY,  the Google Picker (project arnenys-admin)
+  //   GOOGLE_APP_ID
+}

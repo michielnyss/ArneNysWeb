@@ -1,0 +1,19 @@
+{
+  "name": "arnenys-admin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "wrangler dev -c wrangler.local.jsonc --port 8787",
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "check-schema": "node test/schema-check.mjs",
+    "deploy": "node build.mjs && wrangler deploy"
+  },
+  "devDependencies": {
+    "@jsquash/jpeg": "^1.6.0",
+    "esbuild": "^0.25.10",
+    "libheif-js": "^1.19.8",
+    "sortablejs": "^1.15.6",
+    "wrangler": "^4.128.0"
+  }
+}

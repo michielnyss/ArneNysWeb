@@ -1,0 +1,26 @@
+// `npm run dev` only: the editor on http://localhost:8787, never deployed.
+// It has no custom domain (wrangler dev would otherwise present every request
+// as admin.arnenys.com), so the Worker sees a localhost URL and lets
+// DEV_USER_EMAIL from an untracked env file stand in for the Access sign-in.
+// DRY_RUN stays on: a local copy never writes to GitHub.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arnenys-admin-local",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-31",
+  "build": { "command": "node build.mjs", "watch_dir": ["src", "ui", "shared"] },
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "GITHUB_REPO": "michielnyss/ArneNysWeb",
+    "GITHUB_BRANCH": "main",
+    "DRY_RUN": "true",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": ""
+  }
+}
