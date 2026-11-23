@@ -48,6 +48,9 @@ const sizes = [
     height: 100%;
     object-fit: cover;
     object-position: 48.8% 10.4%;
+    /* Soften the bottom edge into the page background instead of a hard line. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
   }
   .hero h1 {
     position: absolute;
