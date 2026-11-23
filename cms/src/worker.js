@@ -141,7 +141,7 @@ export default {
           if (dryRun(env)) return json({ ok: true, dryRun: true, head: s.head, ...summary });
           try {
             const sha = await commit(env, { head: s.head, tree: s.tree, entries: plan.entries, message: plan.message });
-            console.log('commit', sha, plan.changed.map((c) => `${c.action}:${c.slug}`).join(' '), user.email);
+            console.log('commit', sha, plan.changed.map((c) => `${c.action}:${c.slug}`).join(' '));
             return json({ ok: true, head: sha, ...summary });
           } catch (e) {
             if (e.status === 422 && attempt < 2) continue; // main moved; re-plan on the new head

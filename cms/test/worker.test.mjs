@@ -134,7 +134,7 @@ test('save commits one tree/commit/ref update, with the name in the message', as
   assert.equal(JSON.parse(tree.tree[0].content).status, 'Reserved');
   const commit = JSON.parse(calls.find((c) => c.url.endsWith('/git/commits')).body);
   assert.deepEqual(commit.parents, [snap.head]);
-  assert.match(commit.message, /^Update "Avondwind"\n\nSaved by Michiel Nys/);
+  assert.match(commit.message, /^Update "Avondwind"\n\nSaved in admin/);
   const ref = calls.find((c) => c.url.endsWith('/git/refs/heads/main'));
   assert.equal(ref.method, 'PATCH');
   assert.equal(JSON.parse(ref.body).force, false);

@@ -1,5 +1,5 @@
 # Builds the site and deploys it to Cloudflare on every push to main, which
-# includes every save in the /admin editor (Sveltia CMS commits straight to
+# includes every save in the admin editor (admin.arnenys.com commits straight to
 # main). Can also be started by hand from the Actions tab.
 name: Deploy
 

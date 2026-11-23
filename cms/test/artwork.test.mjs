@@ -44,7 +44,7 @@ test('editing one field changes only that field; legacySlug and focalPoint survi
   // The dropped photo is deleted from the repo, nothing else is.
   const deleted = plan.entries.filter((e) => e.sha === null).map((e) => e.path);
   assert.deepEqual(deleted, ['src/assets/artworks/avondwind/02.jpg']);
-  assert.match(plan.message, /^Update "Avondwind"\n\nSaved by Test Person/);
+  assert.match(plan.message, /^Update "Avondwind"\n\nSaved in admin/);
 });
 
 test('a new work gets a fresh slug, order -1, absolute image paths and numbered photos', () => {
@@ -216,7 +216,7 @@ test('the commit message says what changed', () => {
   const slug = 'avondwind';
   const msg = (edit) => save(snap, slug, edit).message;
   const withPhotos = save(snap, slug, (d) => { d.title = 'Avondwind II'; d.gallery[0].focalPoint = { x: 0.3, y: 0.5 }; });
-  assert.match(withPhotos.message, /^Update "Avondwind II"\n\nSaved by Test Person in admin\.arnenys\.com\.\n\n- "Avondwind II": Changed: title, crop of cover\n$/);
+  assert.match(withPhotos.message, /^Update "Avondwind II"\n\nSaved in admin.arnenys.com.\n\n- "Avondwind II": Changed: title, crop of cover\n$/);
   assert.match(msg((d) => { d.year = 2001; d.dimensions = '1 × 1 cm'; d.medium = 'Oil'; d.status = 'Sold'; d.description = 'x'; }),
     /: Changed: year, size, material, sold status, description\n/);
   assert.match(msg((d) => { d.gallery = [d.gallery[0], d.gallery[2], d.gallery[1]]; }), /: Changed: photo order\n/);

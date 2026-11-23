@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Privacy" description="Who runs this site and what it does with your data." theme="sage">
+  <div class="wrap legal">
+    <h1>Privacy</h1>
+
+    <p>
+      This site shows the work of Arne Nys. Nothing is sold through it. Contact:
+      <a href="mailto:arnenys129@gmail.com">arnenys129@gmail.com</a>.
+    </p>
+
+    <p>
+      The site sets no cookies and uses no analytics or tracking. It is hosted by Cloudflare, which
+      processes your IP address to deliver the pages and protect against abuse.
+    </p>
+
+    <p>
+      If you send an email, it is only used to reply to you and is not shared.
+    </p>
+
+    <p>
+      You can ask to see, correct or delete your data at the address above, and you can complain to the
+      <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener" target="_blank">Belgian Data Protection Authority</a>.
+    </p>
+
+    <p>All works and images © Arne Nys.</p>
+  </div>
+</Base>
+
+<style>
+  .legal {
+    max-width: 40rem;
+    padding-top: clamp(4rem, 14vh, 9rem);
+  }
+  .legal h1 {
+    color: var(--cream);
+    font-size: clamp(1.6rem, 3.233vw, 3.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .legal p {
+    margin: 0 0 1rem;
+    color: var(--cream);
+  }
+  .legal a {
+    border-bottom: 1px solid currentColor;
+  }
+</style>

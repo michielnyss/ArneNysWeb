@@ -204,7 +204,6 @@ export function changeSummary(before, after) {
 }
 
 export function commitMessage(changed, user) {
-  const who = user?.name || user?.email || 'the admin';
   const q = (c) => `"${c.title}"`;
   const real = changed.filter((c) => !c.orderOnly);
   const reordered = changed.some((c) => c.orderOnly);
@@ -222,5 +221,5 @@ export function commitMessage(changed, user) {
     return `- ${q(c)}: ${c.summary || 'updated'}`;
   };
   const lines = changed.filter((c) => !c.orderOnly || !real.length).map(line);
-  return `${subject}\n\nSaved by ${who} in admin.arnenys.com.\n\n${lines.join('\n')}\n`;
+  return `${subject}\n\nSaved in admin.arnenys.com.\n\n${lines.join('\n')}\n`;
 }
