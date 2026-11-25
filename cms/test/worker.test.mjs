@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { generateKeyPairSync, webcrypto } from 'node:crypto';
 import worker from '../src/worker.js';
 import { pemToPkcs8 } from '../src/github.js';
-import { localSnapshot } from './helpers.mjs';
+import { graphqlSnapshot, localSnapshot } from './helpers.mjs';
 
 // Workers-only globals.
 globalThis.FixedLengthStream ||= class extends TransformStream { constructor() { super(); } };
@@ -34,15 +34,6 @@ const appKey = generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.ex
 
 // ---- fetch mock
 const calls = [];
-function graphqlSnapshot() {
-  return {
-    data: { repository: { ref: { target: {
-      oid: snap.head, tree: { oid: snap.tree },
-      works: { object: { entries: Object.entries(snap.works).map(([s, w]) => ({ name: `${s}.json`, oid: w.sha, object: { text: w.text, isTruncated: false } })) } },
-      assets: { object: { entries: Object.entries(snap.assets).map(([s, names]) => ({ name: s, type: 'tree', object: { entries: names.map((n) => ({ name: n, type: 'blob' })) } })) } },
-    } } } },
-  };
-}
 let refStatus = 200;
 globalThis.fetch = async (input, init = {}) => {
   const url = String(input);
@@ -55,7 +46,7 @@ globalThis.fetch = async (input, init = {}) => {
   if (url === `${TEAM}/cdn-cgi/access/get-identity`) return ok({ name: 'Michiel Nys', email: 'michiel@example.com' });
   if (url.endsWith('/repos/michielnyss/ArneNysWeb/installation')) return ok({ id: 42 });
   if (url.endsWith('/app/installations/42/access_tokens')) return ok({ token: 'inst-token', expires_at: new Date(Date.now() + 3600e3).toISOString() }, 201);
-  if (url.endsWith('/graphql')) return ok(graphqlSnapshot());
+  if (url.endsWith('/graphql')) return ok(graphqlSnapshot(snap));
   if (url.endsWith('/git/blobs')) return ok({ sha: 'f'.repeat(40) }, 201);
   if (url.endsWith('/git/trees')) return ok({ sha: '1'.repeat(40) }, 201);
   if (url.endsWith('/git/commits')) return ok({ sha: '2'.repeat(40) }, 201);

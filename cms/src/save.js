@@ -23,7 +23,8 @@ const NEW_PREFIX = 'new:';
  * @param req {works: [{slug|null, baseSha|null, data, newImages: {id: {sha, ext}}}],
  *             deletes: [{slug, baseSha}]}
  * @param user {name, email}
- * @returns {entries: [{path, mode, type, sha?|content?}], message, changed: [...], files: [...]}
+ * @returns {entries: [{path, mode, type, sha?|content?}], message, changed: [...],
+ *   saved: [{slug, gallery: [src]}] (each saved work as it will be, new photos named)}
  */
 export function planSave(snapshot, req, user) {
   const works = Array.isArray(req?.works) ? req.works : [];
@@ -124,8 +125,9 @@ export function planSave(snapshot, req, user) {
     }
   }
 
-  if (!entries.length) return { entries, message: null, changed, noop: true };
-  return { entries, message: commitMessage(changed, user), changed, noop: false };
+  const saved = upserts.map((u) => ({ slug: u.slug, gallery: (u.data.gallery || []).map((g) => g.src) }));
+  if (!entries.length) return { entries, message: null, changed, saved, noop: true };
+  return { entries, message: commitMessage(changed, user), changed, saved, noop: false };
 }
 
 function sanitizeEdited(d) {

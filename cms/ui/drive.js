@@ -1,14 +1,21 @@
-// "Choose from Google Drive": Google Identity Services for a short-lived token
-// with the drive.file scope only (the app sees just the files picked here,
-// never the rest of Drive), and the Google Picker to choose them.
+// Google Drive from the browser, with the signed-in person's own short-lived
+// token, scope drive.file only: the app sees just the files picked or
+// uploaded here, never the rest of Drive.
+//   - "Choose from Google Drive": the Google Picker.
+//   - Archive photos: uploaded into a work's folder (the Worker hands out the
+//     folder id; this token cannot list it, only add to it), or picked files
+//     copied there. The Worker's own account cannot create files, so this is
+//     the only way photos get into the archive from the editor.
 
 const SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const MIME = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'image/avif', 'image/gif'].join(',');
+const API = 'https://www.googleapis.com/drive/v3';
+const UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
 
 let cfg = null;
+let devUpload = null; // the local stand-in's upload URL (test/mock-server.mjs only)
 let token = null; // { value, exp }
-let tokenClient = null;
-let loading = null;
+let gis = null;
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -21,29 +28,28 @@ function loadScript(src) {
   });
 }
 
-export function configureDrive(google) {
+const once = (fn) => {
+  let p = null;
+  return () => (p ||= fn().catch((e) => { p = null; throw e; }));
+};
+const loadGis = once(() => loadScript('https://accounts.google.com/gsi/client'));
+const loadPicker = once(() => loadScript('https://apis.google.com/js/api.js').then(() => new Promise((r) => window.gapi.load('picker', r))));
+
+export function configureDrive(google, devUploadUrl = null) {
   cfg = google;
+  devUpload = devUploadUrl;
 }
 
-export function driveAvailable() {
-  return !!cfg;
-}
+/** The Picker needs the API key as well as the client id. */
+export const pickerAvailable = () => !!cfg?.apiKey;
+/** Uploading into the archive needs a Google sign-in (or the local stand-in). */
+export const uploadAvailable = () => !!(cfg?.clientId || devUpload);
 
-function load() {
-  loading ||= Promise.all([
-    loadScript('https://accounts.google.com/gsi/client'),
-    loadScript('https://apis.google.com/js/api.js').then(() => new Promise((r) => window.gapi.load('picker', r))),
-  ]).catch((e) => {
-    loading = null;
-    throw e;
-  });
-  return loading;
-}
-
-function getToken() {
-  if (token && token.exp - Date.now() > 60_000) return Promise.resolve(token.value);
+async function getToken() {
+  if (token && token.exp - Date.now() > 60_000) return token.value;
+  await loadGis();
   return new Promise((resolve, reject) => {
-    tokenClient = window.google.accounts.oauth2.initTokenClient({
+    gis = window.google.accounts.oauth2.initTokenClient({
       client_id: cfg.clientId,
       scope: SCOPE,
       callback: (resp) => {
@@ -53,7 +59,7 @@ function getToken() {
       },
       error_callback: (err) => reject(Object.assign(new Error(err?.type || 'cancelled'), { cancelled: true })),
     });
-    tokenClient.requestAccessToken({ prompt: '' });
+    gis.requestAccessToken({ prompt: '' });
   });
 }
 
@@ -62,7 +68,7 @@ function getToken() {
  * (empty if cancelled), where file() downloads that photo as a Blob.
  */
 export async function pickFromDrive() {
-  await load();
+  await loadPicker();
   const accessToken = await getToken();
   const g = window.google.picker;
   return new Promise((resolve) => {
@@ -71,7 +77,7 @@ export async function pickFromDrive() {
       .setIncludeFolders(true)
       .setSelectFolderEnabled(false)
       .setMode(g.DocsViewMode.GRID);
-    const picker = new g.PickerBuilder()
+    const built = new g.PickerBuilder()
       .setAppId(cfg.appId)
       .setDeveloperKey(cfg.apiKey)
       .setOAuthToken(accessToken)
@@ -95,15 +101,84 @@ export async function pickFromDrive() {
         );
       })
       .build();
-    picker.setVisible(true);
+    built.setVisible(true);
   });
 }
 
 async function download(id, mimeType) {
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`, {
+  const res = await fetch(`${API}/files/${encodeURIComponent(id)}?alt=media`, {
     headers: { authorization: `Bearer ${token.value}` },
   });
   if (!res.ok) throw new Error(`Drive download failed (${res.status})`);
   const blob = await res.blob();
   return blob.type ? blob : new Blob([blob], { type: mimeType });
+}
+
+const TYPES = { heic: 'image/heic', heif: 'image/heif', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+/** A file's type; Windows browsers often give none for .heic. */
+export const typeOf = (file) => file.type || TYPES[String(file.name).split('.').pop().toLowerCase()] || 'application/octet-stream';
+
+async function driveError(res, what) {
+  const text = await res.text().catch(() => '');
+  let detail = text.slice(0, 120);
+  try { detail = JSON.parse(text).error?.message || detail; } catch {}
+  return new Error(`${what} (${res.status}${detail ? `: ${detail}` : ''})`);
+}
+
+/**
+ * Signs in to Google now, if needed. Call it straight from the click that
+ * starts an upload: the sign-in popup is only allowed right after a click.
+ */
+export const ensureDriveToken = () => (devUpload ? Promise.resolve() : getToken());
+export const hasDriveToken = () => !!devUpload || !!(token && token.exp - Date.now() > 60_000);
+
+/**
+ * Uploads `file` as it is (the original, no conversion) into the Drive
+ * folder `folderId`, as `name` (the archive's name for it, from the Worker)
+ * with `description` (which keeps the original name). Resolves with
+ * { id, name }. Resumable upload, so large photos go in one request each
+ * way; multipart if the browser cannot read the session URL.
+ */
+export async function uploadToFolder(folderId, file, name = file.name, description = '') {
+  const type = typeOf(file);
+  if (devUpload) {
+    const q = new URLSearchParams({ folder: folderId, name, type, description });
+    const res = await fetch(`${devUpload}?${q}`, { method: 'POST', body: file });
+    if (!res.ok) throw await driveError(res, 'Upload failed');
+    return res.json();
+  }
+  const auth = { authorization: `Bearer ${await getToken()}` };
+  const meta = JSON.stringify({ name, description, parents: [folderId], mimeType: type });
+  const start = await fetch(`${UPLOAD}?uploadType=resumable&fields=id,name`, {
+    method: 'POST',
+    headers: { ...auth, 'content-type': 'application/json; charset=UTF-8', 'x-upload-content-type': type },
+    body: meta,
+  });
+  if (!start.ok) throw await driveError(start, 'Upload failed');
+  const session = start.headers.get('location');
+  const res = session
+    ? await fetch(session, { method: 'PUT', headers: { 'content-type': type }, body: file })
+    : await fetch(`${UPLOAD}?uploadType=multipart&fields=id,name`, {
+      method: 'POST',
+      headers: auth,
+      body: (() => {
+        const form = new FormData();
+        form.append('metadata', new Blob([meta], { type: 'application/json' }));
+        form.append('file', file);
+        return form;
+      })(),
+    });
+  if (!res.ok) throw await driveError(res, 'Upload failed');
+  return res.json();
+}
+
+/** A copy of a picked Drive file in `folderId`, as `name` (the original stays where it was). */
+export async function copyToFolder(fileId, folderId, name, description = '') {
+  const res = await fetch(`${API}/files/${encodeURIComponent(fileId)}/copy?fields=id,name`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${await getToken()}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ parents: [folderId], name, description }),
+  });
+  if (!res.ok) throw await driveError(res, 'Copy failed');
+  return res.json();
 }

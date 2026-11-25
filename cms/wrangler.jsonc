@@ -34,10 +34,16 @@
     // Cloudflare Access: the team domain and the application's AUD tag (both
     // public identifiers, from Zero Trust > Access > Applications).
     "ACCESS_TEAM_DOMAIN": "https://arnenys.cloudflareaccess.com",
-    "ACCESS_AUD": "7b68c41b4eb1583075a1bcf3e1c563500e9b6487ea4a9d0911cbdf9bfc422860"
+    "ACCESS_AUD": "7b68c41b4eb1583075a1bcf3e1c563500e9b6487ea4a9d0911cbdf9bfc422860",
+    // The archive (#/archive): the Drive folder "Arne Kunst" (in Michiel's Drive,
+    // shared with the service account as Editor) and the Sheet "Archive" in it
+    // (ids from their URLs). Off until GOOGLE_SA_KEY is set too.
+    "ARCHIVE_FOLDER_ID": "1y8ZwrmCjHMes0GZF-Hh99jY4RbVyIVpV",
+    "ARCHIVE_SHEET_ID": "18CY_B_scfCrSmWU7zN3iQslxdPv1aynialIcsw_4FbA"
   }
   // Secrets (set with `npx wrangler secret put NAME`, never in this file):
   //   GH_APP_ID, GH_APP_PRIVATE_KEY      the arnenys-admin GitHub App
   //   GOOGLE_CLIENT_ID, GOOGLE_API_KEY,  the Google Picker (project arnenys-admin)
   //   GOOGLE_APP_ID
+  //   GOOGLE_SA_KEY                      the archive service account's JSON key file
 }

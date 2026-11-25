@@ -24,3 +24,14 @@ export function localSnapshot() {
   }
   return { head: 'a'.repeat(40), tree: 'b'.repeat(40), works, assets };
 }
+
+/** GitHub's GraphQL answer to the Worker's snapshot query, for a snapshot like the one above. */
+export function graphqlSnapshot(snap, head = snap.head) {
+  return {
+    data: { repository: { ref: { target: {
+      oid: head, tree: { oid: snap.tree },
+      works: { object: { entries: Object.entries(snap.works).map(([s, w]) => ({ name: `${s}.json`, oid: w.sha, object: { text: w.text, isTruncated: false } })) } },
+      assets: { object: { entries: Object.entries(snap.assets).map(([s, names]) => ({ name: s, type: 'tree', object: { entries: names.map((n) => ({ name: n, type: 'blob' })) } })) } },
+    } } } },
+  };
+}

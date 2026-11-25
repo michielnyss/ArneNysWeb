@@ -5,6 +5,7 @@
 //   GET  /api/photo/<commit sha>/src/assets/...   one repo image at that commit
 //   POST /api/blob      upload one photo (base64 JSON) -> blob sha
 //   POST /api/save      commit edits/new works/deletions to main in one commit
+//   /api/archive...     Arne's archive in Drive + the Sheet (see archive-routes.js)
 //   *                   the editor's static files (public/)
 //
 // Every request, static files included, must carry a valid Cloudflare Access
@@ -12,43 +13,16 @@
 // GitHub: uploads are discarded and a save only reports what it would commit.
 
 import { authenticate } from './access.js';
-import { commit, createBlob, readFile, repoParts, snapshot } from './github.js';
+import { archiveRoute } from './archive-routes.js';
+import { archiveConfig } from './drive.js';
+import { createBlob, readFile, repoParts, snapshot } from './github.js';
+import { dryRun, json, security, UserError } from './http.js';
 import { parsePhotoPath } from './photo.js';
-import { planSave, SaveError } from './save.js';
+import { saveToRepo } from './repo.js';
+import { SaveError } from './save.js';
+import { SheetConflict } from './sheet.js';
 
 const MAX_BLOB_BYTES = 30 * 1024 * 1024; // a 20 MB photo is ~27 MB as base64 JSON
-
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' https://apis.google.com https://accounts.google.com/gsi/client 'wasm-unsafe-eval'",
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
-  "img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com https://*.google.com",
-  "connect-src 'self' blob: https://www.googleapis.com https://content.googleapis.com https://accounts.google.com/gsi/",
-  'frame-src https://docs.google.com https://drive.google.com https://accounts.google.com https://content.googleapis.com',
-  "font-src 'self'",
-  "object-src 'none'",
-  "base-uri 'none'",
-  "frame-ancestors 'none'",
-].join('; ');
-
-const security = {
-  'content-security-policy': CSP,
-  'x-content-type-options': 'nosniff',
-  // The Picker's API key is restricted to this site's referrer, so Google must
-  // see the origin (but never the full URL).
-  'referrer-policy': 'strict-origin-when-cross-origin',
-  'x-robots-tag': 'noindex, nofollow',
-  // The Picker opens Google sign-in in a popup and needs to talk back to it.
-  'cross-origin-opener-policy': 'same-origin-allow-popups',
-};
-
-const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...security },
-  });
-
-const dryRun = (env) => String(env.DRY_RUN).toLowerCase() === 'true';
 
 export default {
   async fetch(request, env) {
@@ -93,9 +67,13 @@ export default {
           dryRun: dryRun(env),
           repo: `${owner}/${repo}`,
           branch,
-          google: env.GOOGLE_CLIENT_ID && env.GOOGLE_API_KEY
-            ? { clientId: env.GOOGLE_CLIENT_ID, apiKey: env.GOOGLE_API_KEY, appId: env.GOOGLE_APP_ID || '' }
+          archive: Boolean(archiveConfig(env)),
+          // The client id alone is enough to upload to Drive; the Picker also needs the API key.
+          google: env.GOOGLE_CLIENT_ID
+            ? { clientId: env.GOOGLE_CLIENT_ID, apiKey: env.GOOGLE_API_KEY || '', appId: env.GOOGLE_APP_ID || '' }
             : null,
+          // Local stand-in only (test/mock-server.mjs): uploads go to a fake Drive.
+          devUpload: ['localhost', '127.0.0.1'].includes(url.hostname) && env.DEV_DRIVE_UPLOAD || null,
         });
       }
 
@@ -132,6 +110,9 @@ export default {
         return new Response(res.body, { status: 200, headers });
       }
 
+      const archived = await archiveRoute(request, env, url, user);
+      if (archived) return archived;
+
       if (url.pathname === '/api/blob' && request.method === 'POST') {
         const length = Number(request.headers.get('content-length')) || 0;
         if (length > MAX_BLOB_BYTES) return json({ error: 'That photo is too large (over 20 MB).' }, 413);
@@ -155,30 +136,13 @@ export default {
 
       if (url.pathname === '/api/save' && request.method === 'POST') {
         const req = await request.json();
-        for (let attempt = 0; ; attempt++) {
-          const s = await snapshot(env);
-          const plan = planSave(s, req, user);
-          if (plan.noop) return json({ ok: true, noop: true, head: s.head });
-          const summary = {
-            message: plan.message,
-            files: plan.entries.map((e) => ({ path: e.path, action: e.sha === null ? 'delete' : 'write' })),
-            changed: plan.changed,
-          };
-          if (dryRun(env)) return json({ ok: true, dryRun: true, head: s.head, ...summary });
-          try {
-            const sha = await commit(env, { head: s.head, tree: s.tree, entries: plan.entries, message: plan.message });
-            console.log('commit', sha, plan.changed.map((c) => `${c.action}:${c.slug}`).join(' '));
-            return json({ ok: true, head: sha, ...summary });
-          } catch (e) {
-            if (e.status === 422 && attempt < 2) continue; // main moved; re-plan on the new head
-            throw e;
-          }
-        }
+        return json({ ok: true, ...(await saveToRepo(env, () => req, user, dryRun(env))) });
       }
 
       return json({ error: 'Not found.' }, 404);
     } catch (e) {
-      if (e instanceof SaveError) return json({ error: e.message, details: e.details }, e.status);
+      if (e instanceof SaveError || e instanceof UserError) return json({ error: e.message, details: e.details }, e.status);
+      if (e instanceof SheetConflict) return json({ error: e.message, details: e.keys }, e.status);
       console.error(e.stack || e.message);
       return json({ error: 'Something went wrong on the server. Nothing was saved. Please try again in a minute.' }, 500);
     }
