@@ -123,7 +123,7 @@ function go(hash) {
 function showList() {
   if (!leaveEditor()) return;
   setScreen('list');
-  document.title = 'Works — arnenys.com admin';
+  document.title = 'Works | arnenys.com admin';
   // The works as the home page grid shows them: same columns, tiles, crop and captions.
   const list = h('ol', { class: 'site-grid', 'aria-label': 'All works, in the order of the website grid' });
   const order = (S.pendingOrder || sortedWorks().map((w) => w.slug)).filter((slug) => workBySlug(slug));
@@ -141,8 +141,8 @@ function showList() {
           h('span', { class: 'site-caption' }, title),
         ),
         h('span', { class: 'tile-tools' },
-          h('button', { class: 'icon-btn move-earlier', type: 'button', title: 'Move earlier', 'aria-label': `Move “${title}” earlier`, disabled: i === 0, onclick: () => nudge(w.slug, -1) }),
-          h('button', { class: 'icon-btn move-later', type: 'button', title: 'Move later', 'aria-label': `Move “${title}” later`, disabled: i === order.length - 1, onclick: () => nudge(w.slug, 1) }),
+          h('button', { class: 'icon-btn move-earlier', type: 'button', title: 'Move earlier', 'aria-label': `Move "${title}" earlier`, disabled: i === 0, onclick: () => nudge(w.slug, -1) }),
+          h('button', { class: 'icon-btn move-later', type: 'button', title: 'Move later', 'aria-label': `Move "${title}" later`, disabled: i === order.length - 1, onclick: () => nudge(w.slug, 1) }),
         ),
       ),
     );
@@ -260,7 +260,7 @@ function renderEditor() {
   const D = S.draft;
   const o = D.original;
   const isNew = !D.slug;
-  document.title = `${isNew ? 'New work' : o.title} — arnenys.com admin`;
+  document.title = `${isNew ? 'New work' : o.title} | arnenys.com admin`;
   const onInput = () => { setDirty(true); renderPreviewText(); };
   const order = h('input', { id: 'f-order', type: 'number', inputmode: 'numeric', step: 1, value: o.order ?? NEW_WORK_ORDER, oninput: onInput });
 
@@ -291,11 +291,11 @@ function renderEditor() {
     h('section', { class: 'panel' }, field('Position', order, 'f-order')),
     !isNew ? h('section', { class: 'panel danger-zone' },
       h('h2', {}, 'Delete'),
-      h('button', { class: 'btn danger', type: 'button', onclick: deleteWork }, `Delete “${o.title}”`),
+      h('button', { class: 'btn danger', type: 'button', onclick: deleteWork }, `Delete "${o.title}"`),
     ) : null,
     previewLink(),
     h('div', { class: 'action-bar' },
-      h('span', { id: 'save-state', class: 'save-state' }, D.dirty ? 'Not saved yet' : isNew ? 'New — not saved yet' : 'No changes'),
+      h('span', { id: 'save-state', class: 'save-state' }, D.dirty ? 'Not saved yet' : isNew ? 'New, not saved yet' : 'No changes'),
       h('span', { class: 'bar-buttons' },
         h('a', { class: 'btn quiet', href: '#/' }, 'Back'),
         h('button', { class: 'btn primary', id: 'save-btn', type: 'submit', disabled: !D.dirty && !isNew }, 'Save'),
@@ -338,7 +338,7 @@ async function addFiles(items) {
   const D = S.draft;
   for (const it of items) {
     if (it.size > 20 * 1024 * 1024) {
-      photoNotice(`“${it.name}” is ${Math.round(it.size / 1048576)} MB. Photos can be at most 20 MB — please pick a smaller version.`);
+      photoNotice(`"${it.name}" is ${Math.round(it.size / 1048576)} MB. Photos can be at most 20 MB. Please pick a smaller version.`);
       continue;
     }
     const p = { key: ++photoSeq, src: null, alt: '', state: 'working' };
@@ -356,7 +356,7 @@ async function addFiles(items) {
       setDirty(true);
     } catch (e) {
       D.photos.splice(D.photos.indexOf(p), 1);
-      photoNotice(e instanceof PhotoProblem ? e.message : `“${it.name}” could not be added (${e.message}). Please try again.`);
+      photoNotice(e instanceof PhotoProblem ? e.message : `"${it.name}" could not be added (${e.message}). Please try again.`);
     }
     renderPhotos();
   }
@@ -411,7 +411,7 @@ async function saveDraft() {
     return toast(`A photo could not be uploaded: ${e.message} Nothing was saved. Please try again.`, 'error');
   }
   S.busy = false;
-  await runSave({ works: [{ slug: D.slug, baseSha: D.baseSha, data, newImages }] }, `“${data.title}”`, (res) => {
+  await runSave({ works: [{ slug: D.slug, baseSha: D.baseSha, data, newImages }] }, `"${data.title}"`, (res) => {
     const slug = res.changed?.find((c) => c.action === 'add')?.slug || D.slug;
     D.dirty = false;
     go(`#/work/${encodeURIComponent(slug)}`);
@@ -421,8 +421,8 @@ async function saveDraft() {
 async function deleteWork() {
   const D = S.draft;
   const title = D.original.title;
-  if (!confirm(`Delete “${title}” and all its photos from the website?`)) return;
-  await runSave({ works: [], deletes: [{ slug: D.slug, baseSha: D.baseSha }] }, `the deletion of “${title}”`, () => {
+  if (!confirm(`Delete "${title}" and all its photos from the website?`)) return;
+  await runSave({ works: [], deletes: [{ slug: D.slug, baseSha: D.baseSha }] }, `the deletion of "${title}"`, () => {
     D.dirty = false;
     go('#/');
   });
@@ -458,7 +458,7 @@ async function runSave(payload, what, after) {
     S.busy = false;
     setBusy(false);
     after(res);
-    toast('Saved — live in a few minutes.', 'ok', 12000);
+    toast('Saved. Live in a few minutes.', 'ok', 12000);
   } catch (e) {
     S.busy = false;
     setBusy(false);

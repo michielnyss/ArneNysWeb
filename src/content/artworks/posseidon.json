@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/posseidon/01.jpg",
-      "alt": "Posseidon — Arne Nys",
+      "alt": "Posseidon, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/posseidon/02.jpg",
-      "alt": "Posseidon — Arne Nys",
+      "alt": "Posseidon, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/posseidon/03.jpg",
-      "alt": "Posseidon — Arne Nys",
+      "alt": "Posseidon, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

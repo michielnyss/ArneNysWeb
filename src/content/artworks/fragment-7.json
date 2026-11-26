@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/fragment-7/01.jpg",
-      "alt": "Fragment 7 — Arne Nys",
+      "alt": "Fragment 7, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/fragment-7/02.jpg",
-      "alt": "Fragment 7 — Arne Nys",
+      "alt": "Fragment 7, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

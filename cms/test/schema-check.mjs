@@ -40,7 +40,7 @@ function makeProject(extraWorks = {}) {
   edit.year = null;
   edit.gallery = [edit.gallery[1], edit.gallery[0]];
   const fresh = {
-    title: 'Schema check — new work', year: 2026, order: -1, description: 'Line one.\nLine two.', medium: 'Aluminium', dimensions: '60 × 55 × 30 cm', status: 'Reserved',
+    title: 'Schema check: new work', year: 2026, order: -1, description: 'Line one.\nLine two.', medium: 'Aluminium', dimensions: '60 × 55 × 30 cm', status: 'Reserved',
     gallery: [{ src: 'new:1', alt: 'Front view' }],
   };
   const plan = planSave(snap, {

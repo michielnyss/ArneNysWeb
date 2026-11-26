@@ -40,30 +40,30 @@ function convert(bytes, kind, mime) {
  */
 export async function preparePhoto(file, name = file.name || 'This photo') {
   if (file.size > MAX_BYTES)
-    throw new PhotoProblem(`“${name}” is ${MB(file.size)}. Photos can be at most 20 MB — please pick a smaller version.`);
+    throw new PhotoProblem(`"${name}" is ${MB(file.size)}. Photos can be at most 20 MB. Please pick a smaller version.`);
   const bytes = new Uint8Array(await file.arrayBuffer());
   const kind = sniff(bytes);
   try {
     const clean = cleanLossless(bytes);
     if (clean) return { ...clean, converted: false };
   } catch {
-    throw new PhotoProblem(`“${name}” seems to be damaged and could not be read. Please try another copy of it.`);
+    throw new PhotoProblem(`"${name}" seems to be damaged and could not be read. Please try another copy of it.`);
   }
   if (kind === 'heic' || kind === 'avif' || kind === 'gif') {
     try {
       const out = await convert(bytes, kind, file.type);
       if (out.bytes.length > MAX_BYTES)
-        throw new PhotoProblem(`“${name}” is too large once converted. Please pick a smaller version.`);
+        throw new PhotoProblem(`"${name}" is too large once converted. Please pick a smaller version.`);
       return { bytes: out.bytes, ext: 'jpg', type: 'image/jpeg', converted: true, width: out.width, height: out.height };
     } catch (e) {
       if (e instanceof PhotoProblem) throw e;
       console.error(e);
       throw new PhotoProblem(
         kind === 'heic'
-          ? `“${name}” is an iPhone (HEIC) photo that could not be converted here. On the iPhone, set Settings › Camera › Formats to “Most Compatible”, or share the photo as JPEG, and try again.`
-          : `“${name}” could not be converted. Please save it as a JPEG and try again.`,
+          ? `"${name}" is an iPhone (HEIC) photo that could not be converted here. On the iPhone, set Settings › Camera › Formats to "Most Compatible", or share the photo as JPEG, and try again.`
+          : `"${name}" could not be converted. Please save it as a JPEG and try again.`,
       );
     }
   }
-  throw new PhotoProblem(`“${name}” is not a photo format the website can use. Please use JPEG, PNG or iPhone (HEIC) photos.`);
+  throw new PhotoProblem(`"${name}" is not a photo format the website can use. Please use JPEG, PNG or iPhone (HEIC) photos.`);
 }

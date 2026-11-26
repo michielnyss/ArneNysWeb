@@ -168,7 +168,7 @@ test('website state: on, off, and the ways it can be changed', () => {
   assert.deepEqual([s.state, s.live, s.reasons], ['changed', true, ['Still on the website']]);
   s = ws({ onWebsite: true });
   assert.deepEqual([s.state, s.live, s.reasons], ['changed', false, ['Not published yet']]);
-  assert.match(ws({ onWebsite: true, websiteSlug: 'nope' }).reasons[0], /No work “nope”/);
+  assert.match(ws({ onWebsite: true, websiteSlug: 'nope' }).reasons[0], /No work "nope"/);
   assert.deepEqual(ws({ onWebsite: true, websiteSlug: 'avondwind', websitePhotos: ['p1', 'gone'] }).reasons, ['1 website photo is no longer in the folder']);
   assert.deepEqual(ws({ onWebsite: true, websiteSlug: 'avondwind', websitePhotos: ['p1'] }).reasons, ['Different photos on the website']);
   assert.deepEqual(ws({ onWebsite: true, websiteSlug: 'avondwind', websitePhotos: ['p1', 'p2'], lastPublished: '2026-10-01T00:00:00Z' }).reasons,
@@ -328,7 +328,7 @@ test('the All works screen: filters, search, year groups, badges and covers', as
   assert.deepEqual(websiteBadge(by['buis 3']), { cls: 'b-chg', text: 'On website · changed' });
   assert.deepEqual(websiteBadge(by.Homarium), { cls: 'b-chg', text: 'Not published yet' });
   assert.deepEqual(websiteBadge(by.zand), { cls: 'b-off', text: 'Not on website' });
-  assert.equal(workMeta(by['buis 3']), 'Working title: “buis 3” · Installation · 5 photos');
+  assert.equal(workMeta(by['buis 3']), 'Working title: "buis 3" · Installation · 5 photos');
   assert.equal(coverOf(by.Avondwind).id, by.Avondwind.row.websitePhotos[0]);
   assert.equal(coverOf({ photos: [], row: null }), null);
 });

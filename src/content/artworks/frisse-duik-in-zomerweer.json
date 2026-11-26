@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/frisse-duik-in-zomerweer/01.jpg",
-      "alt": "Frisse duik in zomerweer — Arne Nys",
+      "alt": "Frisse duik in zomerweer, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/frisse-duik-in-zomerweer/02.jpg",
-      "alt": "Frisse duik in zomerweer — Arne Nys",
+      "alt": "Frisse duik in zomerweer, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

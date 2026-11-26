@@ -14,7 +14,7 @@ import { planGallery, publicDefaults, webPhotoState } from '../shared/publish.js
 import { $app, api, h, notice, toast, uploadBlob } from './dom.js';
 import { invalidateArchive, listHref, loadArchive, loading, problem, websiteBadge } from './archive.js';
 import {
-  copyToFolder, ensureDriveToken, hasDriveToken, pickerAvailable, pickFromDrive, uploadAvailable, uploadToFolder,
+  ensureDriveToken, hasDriveToken, uploadAvailable, uploadToFolder,
 } from './drive.js';
 import {
   pagePreview, previewLink, publicFields, readPublicFields, renderCrop, renderPhotoList, renderPreviewPhotos,
@@ -124,7 +124,7 @@ function captureWeb() {
 function render() {
   captureWeb();
   const w = C.work;
-  document.title = `${w.title} — arnenys.com admin`;
+  document.title = `${w.title} | arnenys.com admin`;
   const b = websiteBadge(w);
   const tabs = [['archive', 'Archive (private)'], ['website', 'Website (public)']];
   const readOnly = C.data.readOnly;
@@ -137,7 +137,7 @@ function render() {
           h('p', { class: 'lede' }, 'Drive: ', h('a', { href: w.url, target: '_blank', rel: 'noopener' }, w.path.join(' / '), ' ↗'),
             ' · ', plural(w.photos.length, 'photo'))),
         h('span', { class: `badge ${b.cls}`, title: w.website.reasons.join('. ') || null },
-          w.website.live && w.website.title !== w.title ? `${b.text} as “${w.website.title}”` : b.text),
+          w.website.live && w.website.title !== w.title ? `${b.text} as "${w.website.title}"` : b.text),
       ),
       h('div', { class: 'tabs', role: 'tablist' }, tabs.map(([id, label]) => h('button', {
         class: `tab${C.tab === id ? ' on' : ''}`, type: 'button', role: 'tab', id: `tab-${id}`, 'aria-selected': String(C.tab === id),
@@ -187,8 +187,8 @@ function archivePane(readOnly) {
         h('img', { src: p.thumb, alt: '', loading: 'lazy', onerror: (e) => e.target.replaceWith(h('span', { class: 'no-thumb' }, 'No preview yet')) }),
         h('button', {
           class: 'star', type: 'button', disabled: readOnly, 'aria-pressed': String(on),
-          'aria-label': on ? `On the website (photo ${n}). Take “${p.name}” off the website` : `Show “${p.name}” on the website`,
-          title: on ? 'On the website — click to take it off' : 'Show on the website',
+          'aria-label': on ? `On the website (photo ${n}). Take "${p.name}" off the website` : `Show "${p.name}" on the website`,
+          title: on ? 'On the website. Click to take it off' : 'Show on the website',
           onclick: () => { C.starred = toggleStar(C.starred, p.id); markDirty('archive'); render(); },
         }, on ? '★' : '☆'),
         on ? h('span', { class: 'star-num' }, n === 1 ? '1 · cover' : String(n)) : null,
@@ -204,15 +204,14 @@ function archivePane(readOnly) {
       h('div', { id: 'drive-notices', 'aria-live': 'polite' }),
       canAdd ? h('div', { class: 'add-photos' },
         h('button', { class: 'btn', type: 'button', onclick: addButton }, '+ Add photos'),
-        pickerAvailable() ? h('button', { class: 'btn', type: 'button', onclick: copyFromDrive }, h('span', { class: 'drive-icon', 'aria-hidden': 'true' }), 'From Google Drive') : null,
         fileInput,
       ) : null,
-      untidy.length ? h('p', { class: 'hint' }, `${plural(untidy.length, 'photo')} not named “${parseWorkFolder(w.name).title} - NN” yet. `,
+      untidy.length ? h('p', { class: 'hint' }, `${plural(untidy.length, 'photo')} not named "${parseWorkFolder(w.name).title} - NN" yet. `,
         h('button', { class: 'btn', type: 'button', onclick: tidyNames }, 'Tidy names')) : null,
-      h('p', { class: 'hint' }, '★ = on the website, in the order starred; the first is the cover. Photos stay in Drive: only the starred ones are copied to the website when you publish. Added photos are saved in this Drive folder as they are, named “working title - 01”, “- 02”, … (the old name is kept in the Drive description).'),
+      h('p', { class: 'hint' }, 'Starred photos go on the website, in the order you star them. The first is the cover.'),
     ),
     fieldsPanel('The work', 'work', readOnly),
-    fieldsPanel('Price and sale', 'sale', readOnly, ' — never on the website'),
+    fieldsPanel('Price and sale', 'sale', readOnly, ' (never on the website)'),
   ];
 }
 
@@ -232,7 +231,7 @@ function fieldsPanel(title, group, readOnly, aside = '') {
       let input;
       if (c.type === 'bool') {
         input = h('select', { id, disabled: readOnly, onchange: onInput },
-          [['', '—'], ['yes', 'Yes'], ['no', 'No']].map(([value, label]) =>
+          [['', 'Not set'], ['yes', 'Yes'], ['no', 'No']].map(([value, label]) =>
             h('option', { value, selected: (v === true ? 'yes' : v === false ? 'no' : v ?? '') === value }, label)));
       } else if (c.long) {
         input = h('textarea', { id, rows: 3, disabled: readOnly, oninput: onInput });
@@ -262,7 +261,7 @@ function renderRename() {
   const name = renameTo();
   box.replaceChildren(name ? h('label', { class: 'check' },
     h('input', { type: 'checkbox', checked: C.keepFolderName !== true, onchange: (e) => { C.keepFolderName = !e.target.checked; } }),
-    ` Also rename the Drive folder “${C.work.name}” to “${name}” (and its photos named after it)`) : '');
+    ` Also rename the Drive folder "${C.work.name}" to "${name}" (and its photos named after it)`) : '');
 }
 
 /** The archive tab's changes, as the row endpoint takes them. */
@@ -324,7 +323,7 @@ async function renamePhotos(w, body) {
 async function tidyNames() {
   const n = untidyPhotos(C.work).length;
   const title = parseWorkFolder(C.work.name).title;
-  if (C.busy || !confirm(`Rename ${plural(n, 'photo')} to “${title} - NN”, in the order they were taken? Each photo's old name is kept in its Drive description.`)) return;
+  if (C.busy || !confirm(`Rename ${plural(n, 'photo')} to "${title} - NN", in the order they were taken? Each photo's old name is kept in its Drive description.`)) return;
   setBusy(true);
   try {
     await renamePhotos(C.work, { mode: 'tidy' });
@@ -364,7 +363,7 @@ async function addPhotos(items) {
       ids.push((await it.put(w.folderId, names[i] || it.name, originalNote(it.name))).id);
     } catch (e) {
       console.error(e);
-      notice(box(), `“${it.name}” could not be added to Drive: ${e.message}`);
+      notice(box(), `"${it.name}" could not be added to Drive: ${e.message}`);
     }
   }
   // Another upload into this folder at the same time may have taken the same numbers: those move up.
@@ -374,17 +373,6 @@ async function addPhotos(items) {
   if (!done) return;
   toast(`${plural(done, 'photo')} added to the Drive folder.`, 'ok', 6000);
   await refresh();
-}
-
-async function copyFromDrive() {
-  try {
-    const picked = await pickFromDrive();
-    await addPhotos(picked.map((f) => ({ name: f.name, type: f.mimeType, put: (id, name, note) => copyToFolder(f.id, id, name, note) })));
-  } catch (e) {
-    if (e.cancelled) return;
-    console.error(e);
-    toast('Google Drive could not be opened. Check that pop-ups are allowed for this page, then try again.', 'error');
-  }
 }
 
 /** Reloads the archive and reopens this card, keeping unsaved edits. */
@@ -417,7 +405,7 @@ function websitePane() {
     }),
     h('span', {}, h('b', {}, 'Show on the website'),
       h('span', { class: 'hint' }, s.live
-        ? ' Turning it off takes the work off arnenys.com when you press “Remove from website”. Nothing in Drive changes.'
+        ? ' Turning it off takes the work off arnenys.com when you press "Remove from website". Nothing in Drive changes.'
         : ' Turn it on, choose what visitors see, then publish.')));
   const out = [h('section', { class: 'panel' }, toggle)];
   if (!C.onWebsite) return out;
@@ -530,7 +518,7 @@ async function run(fn) {
 function publishClicked() {
   const action = publishAction(C.onWebsite, C.work.website.live);
   if (action?.id === 'unpublish') {
-    if (!confirm(`Take “${C.work.website.title}” off the website? Its photos stay in Drive.`)) return;
+    if (!confirm(`Take "${C.work.website.title}" off the website? Its photos stay in Drive.`)) return;
     return run(unpublish);
   }
   if (action?.id === 'publish') return run(publish);
@@ -561,12 +549,12 @@ async function publish() {
     toast(`Preparing photo ${i + 1} of ${uploads.length} for the website…`, 'info');
     if (!p.blob) {
       const res = await fetch(p.thumb.replace('/thumb/', '/original/'), { credentials: 'same-origin' });
-      if (!res.ok) throw new Error(`“${p.name}” could not be read from Drive.`);
+      if (!res.ok) throw new Error(`"${p.name}" could not be read from Drive.`);
       let out;
       try {
         out = await preparePhoto(await res.blob(), p.name);
       } catch (e) {
-        throw new Error(e instanceof PhotoProblem ? e.message : `“${p.name}”: ${e.message}`);
+        throw new Error(e instanceof PhotoProblem ? e.message : `"${p.name}": ${e.message}`);
       }
       p.blob = { sha: (await uploadBlob(out.bytes)).sha, ext: out.ext };
     }
@@ -603,14 +591,14 @@ function finish(res, done) {
   C.webValues = null;
   for (const p of Object.values(C.web)) p.blob = null;
   window.dispatchEvent(new Event('site-changed'));
-  toast(res.sheetError || `${done} — live in a few minutes.`, res.sheetError ? 'error' : 'ok', 12000);
+  toast(res.sheetError || `${done}. Live in a few minutes.`, res.sheetError ? 'error' : 'ok', 12000);
   invalidateArchive();
   refresh().catch(() => {});
 }
 
 /** What a publish did (or, in test mode, would do). */
 function resultPanel(r) {
-  const sheet = Object.entries(r.sheet || {}).map(([k, v]) => `${COLUMNS.find((c) => c.key === k)?.header}: ${Array.isArray(v) ? v.map((x) => x.file || x).join(', ') : v ?? '—'}`);
+  const sheet = Object.entries(r.sheet || {}).map(([k, v]) => `${COLUMNS.find((c) => c.key === k)?.header}: ${Array.isArray(v) ? v.map((x) => x.file || x).join(', ') : v ?? 'empty'}`);
   return h('section', { class: `panel publish-result${r.dryRun ? ' test' : ''}`, id: 'publish-result' },
     h('h2', {}, r.dryRun ? 'Test mode: this is what Publish would do' : r.noop ? 'The website already had this' : 'Published'),
     r.message ? h('pre', { class: 'commit-msg' }, r.message.trim()) : null,

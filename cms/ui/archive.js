@@ -122,7 +122,7 @@ const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 export function workMeta(w) {
   const r = w.row || {};
   return [
-    r.workingTitle && r.workingTitle !== w.title ? `Working title: “${r.workingTitle}”` : null,
+    r.workingTitle && r.workingTitle !== w.title ? `Working title: "${r.workingTitle}"` : null,
     r.technique || r.series && `Series: ${r.series}`,
     plural(w.photos.length, 'photo'),
     r.sold ? 'sold' : null,
@@ -168,7 +168,7 @@ export function loading() {
 }
 
 export async function showArchive(force = false) {
-  document.title = 'All works — arnenys.com admin';
+  document.title = 'All works | arnenys.com admin';
   if (!A.data || force) loading();
   let data;
   try {
@@ -256,7 +256,7 @@ function notices(data) {
   const unlisted = data.works.filter((w) => !w.row).length;
   if (unlisted) out.push(`${plural(unlisted, 'folder')} with photos ${unlisted === 1 ? 'is' : 'are'} not in the Sheet yet.`);
   for (const r of data.orphanRows)
-    out.push(`Sheet row ${r.rowNumber}${r.workingTitle ? ` (“${r.workingTitle}”)` : ''}: ${r.problem.toLowerCase()}.`);
+    out.push(`Sheet row ${r.rowNumber}${r.workingTitle ? ` ("${r.workingTitle}")` : ''}: ${r.problem.toLowerCase()}.`);
   const loose = data.loose || [];
   if (loose.length) {
     const n = loose.reduce((s, l) => s + l.count, 0);
@@ -298,7 +298,7 @@ export function placeChoices(places) {
 
 /** "New work": where it goes (year, optional type) and its working title. The Worker makes the folder and the row. */
 export async function showNewWork() {
-  document.title = 'New work — arnenys.com admin';
+  document.title = 'New work | arnenys.com admin';
   if (!A.data) loading();
   let data;
   try {
@@ -337,7 +337,7 @@ export async function showNewWork() {
       h('div', { class: 'row' }, field('Year', year, 'n-year'), field('Type (folder)', type, 'n-type')),
       h('datalist', { id: 'n-years' }, years.map((y) => h('option', { value: y }))), typeList,
       field('Working title', title, 'n-title'),
-      h('p', { class: 'hint' }, 'The folder goes in “year / type / year - working title”. A year or type folder that is not there yet is made too. Photos added later are named “working title - 01”, “- 02”, …'),
+      h('p', { class: 'hint' }, 'The folder goes in "year / type / year - working title". Missing year or type folders are made too. Photos added later are named "working title - 01", "working title - 02" and so on.'),
     ),
     h('div', { class: 'action-bar' }, h('span', {}), h('span', { class: 'bar-buttons' }, h('a', { class: 'btn quiet', href: listHref() }, 'Cancel'), button)),
   ));

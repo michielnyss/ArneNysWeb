@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/morning-light-grey/01.jpg",
-      "alt": "Morning Light - Grey — Arne Nys",
+      "alt": "Morning Light - Grey, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/morning-light-grey/02.jpg",
-      "alt": "Morning Light - Grey — Arne Nys",
+      "alt": "Morning Light - Grey, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/morning-light-grey/03.jpg",
-      "alt": "Morning Light - Grey — Arne Nys",
+      "alt": "Morning Light - Grey, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

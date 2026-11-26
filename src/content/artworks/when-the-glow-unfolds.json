@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/when-the-glow-unfolds/01.jpg",
-      "alt": "When the glow unfolds — Arne Nys",
+      "alt": "When the glow unfolds, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/when-the-glow-unfolds/02.jpg",
-      "alt": "When the glow unfolds — Arne Nys",
+      "alt": "When the glow unfolds, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

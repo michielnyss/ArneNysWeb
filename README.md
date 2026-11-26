@@ -1,6 +1,6 @@
 # arnenys.com
 
-Arne Nys's portfolio site — an in-house rebuild of the Squarespace original.
+Arne Nys's portfolio site, an in-house rebuild of the Squarespace original.
 
 Static [Astro](https://astro.build) site. No store, no cart, no server: the
 artworks are a portfolio, and the pages are plain HTML with pre-optimised images.
@@ -18,11 +18,11 @@ npm run preview    # serve dist/ locally
 
 Two ways in:
 
-1. **https://admin.arnenys.com** — the editor (code in `cms/`, see
+1. **https://admin.arnenys.com**: the editor (code in `cms/`, see
    `cms/README.md`). Sign in with Google or an email code (allow-list in
    Cloudflare Access). Saving commits to `main`, which rebuilds and deploys the
    site within a few minutes. `/admin` on the site just redirects there.
-2. **By hand** — each artwork is one JSON file in `src/content/artworks/`,
+2. **By hand**: each artwork is one JSON file in `src/content/artworks/`,
    images alongside in `src/assets/artworks/<slug>/`.
 
 An artwork looks like this:
@@ -41,13 +41,13 @@ An artwork looks like this:
 }
 ```
 
-- `order` sets the position in the grid (lower first) — it mirrors the order the
+- `order` sets the position in the grid (lower first). It mirrors the order the
   Squarespace collection had.
 - `dimensions`, `medium` and `status` come from the caption block under the title
   on Squarespace, which held one line each for size, material, year and
   occasionally "Sold". The year is dropped there because it already comes from
   the work's category. Four works have no caption block at all.
-- `description` is empty everywhere — Squarespace never had one. Fill it in via
+- `description` is empty everywhere: Squarespace never had one. Fill it in via
   the editor and it renders under the caption lines.
 - The **first** gallery image is the grid cover. The extraction puts
   Squarespace's own cover first, which for five works is not the first photo in
@@ -58,18 +58,18 @@ An artwork looks like this:
 
 | Path | Source |
 | --- | --- |
-| `/` | `src/pages/index.astro` — hero + full artwork grid |
-| `/artworks/<year>/` | `src/pages/artworks/[entry].astro` — hero + one year |
-| `/artworks/<slug>/` | same file — one artwork |
+| `/` | `src/pages/index.astro`: hero + full artwork grid |
+| `/artworks/<year>/` | `src/pages/artworks/[entry].astro`: hero + one year |
+| `/artworks/<slug>/` | same file, one artwork |
 | `/contact/` | `src/pages/contact.astro` |
 | 404 | `src/pages/404.astro` |
 | `/privacy/` | `src/pages/privacy.astro` |
-| `/admin/` | `src/pages/admin/index.astro` — redirects to admin.arnenys.com |
+| `/admin/` | `src/pages/admin/index.astro`, redirects to admin.arnenys.com |
 
 The hero is shared by `/` and the year pages via `src/components/Hero.astro`.
 
 Years and artwork slugs share the `/artworks/` namespace, so one route resolves
-both — see the comment at the top of `[entry].astro`.
+both; see the comment at the top of `[entry].astro`.
 
 ### Design tokens
 
@@ -84,7 +84,7 @@ Sampled from the live Squarespace site; defined in `src/styles/global.css`.
 | `--navy` | `#02052D` | dark headings |
 
 Type is **Libre Baskerville** (headings) and **Almarai** (body), self-hosted via
-`@fontsource` — no third-party font requests.
+`@fontsource`, so no third-party font requests.
 
 ## Re-extracting from Squarespace
 
@@ -140,7 +140,7 @@ Node 18 cannot parse.
   generated here, so the prices are no longer in the page source at all.
 - Three works are deliberately left off the new site: the two that were never
   titled, and the duplicate **Fragment 7**. See `OMIT` in
-  `tools/build-content.mjs` — remove a slug from that set to bring one back.
+  `tools/build-content.mjs`. Remove a slug from that set to bring one back.
   Their old URLs redirect to `/` rather than 404.
 - The one-off **A Domestic Gallery** event page is not carried over;
   `/a-domestic-gallery` redirects to `/`.
@@ -149,7 +149,7 @@ Node 18 cannot parse.
   editor writes and expects this form; keep it.
 - `npm run content` now replaces only the per-work folders it generates, so
   photos added through the editor survive it. It still rewrites every JSON file
-  from `extracted/`, though — **do not run it once the site is live and Arne
+  from `extracted/`, though, so **do not run it once the site is live and Arne
   has started editing**, or his changes are gone. It is a migration tool, not a
   maintenance one.
 - **Images** go through `src/lib/image-service.ts`, Astro's sharp service with

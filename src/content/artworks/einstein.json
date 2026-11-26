@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/einstein/01.jpg",
-      "alt": "Einstein — Arne Nys",
+      "alt": "Einstein, Arne Nys",
       "focalPoint": {
         "x": 0.33000001311302185,
         "y": 0.38999998569488525
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/einstein/02.jpg",
-      "alt": "Einstein — Arne Nys",
+      "alt": "Einstein, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/einstein/03.jpg",
-      "alt": "Einstein — Arne Nys",
+      "alt": "Einstein, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -33,7 +33,7 @@
     },
     {
       "src": "/src/assets/artworks/einstein/04.jpg",
-      "alt": "Einstein — Arne Nys",
+      "alt": "Einstein, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -41,7 +41,7 @@
     },
     {
       "src": "/src/assets/artworks/einstein/05.jpg",
-      "alt": "Einstein — Arne Nys",
+      "alt": "Einstein, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/forrest-run/01.jpg",
-      "alt": "Forrest run — Arne Nys",
+      "alt": "Forrest run, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/forrest-run/02.jpg",
-      "alt": "Forrest run — Arne Nys",
+      "alt": "Forrest run, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/forrest-run/03.jpg",
-      "alt": "Forrest run — Arne Nys",
+      "alt": "Forrest run, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

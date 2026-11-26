@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/falling-waters-rising-steam/01.jpg",
-      "alt": "Falling waters rising steam — Arne Nys",
+      "alt": "Falling waters rising steam, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/falling-waters-rising-steam/02.jpg",
-      "alt": "Falling waters rising steam — Arne Nys",
+      "alt": "Falling waters rising steam, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

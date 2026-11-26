@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/plasticut-ii/01.jpg",
-      "alt": "Plasticut II — Arne Nys",
+      "alt": "Plasticut II, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/plasticut-ii/02.jpg",
-      "alt": "Plasticut II — Arne Nys",
+      "alt": "Plasticut II, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/plasticut-ii/03.jpg",
-      "alt": "Plasticut II — Arne Nys",
+      "alt": "Plasticut II, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

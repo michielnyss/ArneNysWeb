@@ -37,7 +37,7 @@ export const EDITABLE_COLUMNS = new Set([
 export function cleanChanges(changes) {
   const out = {};
   for (const [k, v] of Object.entries(changes || {})) {
-    if (!EDITABLE_COLUMNS.has(k)) throw new UserError(`“${k}” cannot be changed here.`);
+    if (!EDITABLE_COLUMNS.has(k)) throw new UserError(`"${k}" cannot be changed here.`);
     out[k] = parseCell(COLUMN[k].type, v);
   }
   return out;

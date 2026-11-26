@@ -18,7 +18,7 @@ A small, friendly editor for the works on arnenys.com, made for Arne:
   files only (`drive.file`, not his whole Drive). **Upload from this device** also works.
 - **Save** makes one Git commit to `michielnyss/ArneNysWeb` `main` on the server side,
   through a GitHub App, so Arne needs no GitHub account. The existing Actions workflow then
-  builds and deploys the site, and the editor shows "Saved — live in a few minutes".
+  builds and deploys the site, and the editor shows "Saved. Live in a few minutes.".
 - **Archive** (top bar) is Arne's private archive of all his works: the Google Drive folder
   "Arne Kunst" plus one Google Sheet. Each work has a card with its private details and
   photos, and **Publish to website** puts it on arnenys.com. See "The archive" below.
@@ -147,7 +147,7 @@ truth is the Google Drive folder "Arne Kunst" (`<year>/[<type>/]<work>/<photos>`
 is; **Publish** copies a work's public fields and chosen photos into it.
 
 - **All works** (`#/archive`): every work, by year, with search, filters and its state on
-  the website. The filters (Year, Technique — the Sheet's, else the type folder — and the
+  the website. The filters (Year, Technique (the Sheet's, else the type folder) and the
   website chips) combine with each other and the search, and live in the hash
   (`#/archive?year=2024&technique=Relief&site=on`), so Back and a reload keep them. A work is any folder with photos directly in it, or one a Sheet row names.
   Except (`classify` in `src/archive.js`): folders named in `ARCHIVE_SKIP_FOLDERS`
@@ -168,7 +168,7 @@ is; **Publish** copies a work's public fields and chosen photos into it.
     and then its photos named after the old title.
     The Drive photos, each with a **star**: starred = on the website, in starred order, the
     first is the cover (stored in `Website photos`). **+ Add photos** uploads from the
-    device, **From Google Drive** copies picked files: the original goes into the folder
+    device: the original goes into the folder
     as it is (HEIC stays HEIC; Drive is the archive), named by the scheme below. **Tidy
     names** (shown when some photos are not named that way) renames those. Nothing in Drive
     is ever deleted from the editor; "Remove from website" only takes the star off.

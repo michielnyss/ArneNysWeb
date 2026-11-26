@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/tweestroom-a/01.jpg",
-      "alt": "Tweestroom A — Arne Nys",
+      "alt": "Tweestroom A, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/tweestroom-a/02.jpg",
-      "alt": "Tweestroom A — Arne Nys",
+      "alt": "Tweestroom A, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

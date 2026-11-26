@@ -136,7 +136,7 @@ export function websiteStatus(row, photos, site) {
     if (live) out.reasons.push('Still on the website');
     return { ...out, state: live ? 'changed' : 'off' };
   }
-  if (!live) out.reasons.push(slug ? `No work “${slug}” on the website yet` : 'Not published yet');
+  if (!live) out.reasons.push(slug ? `No work "${slug}" on the website yet` : 'Not published yet');
   else out.reasons.push(...photoDrift(row, photos, slug, onSite));
   return { ...out, state: out.reasons.length ? 'changed' : 'on' };
 }

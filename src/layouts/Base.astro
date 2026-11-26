@@ -31,7 +31,7 @@ const {
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site);
 const socialImage = new URL(image, Astro.site);
-const pageTitle = bareTitle ? title : `${title} — ${SITE_NAME}`;
+const pageTitle = bareTitle ? title : `${title} | ${SITE_NAME}`;
 
 const nav = [
   { label: 'Artworks', href: '/' },

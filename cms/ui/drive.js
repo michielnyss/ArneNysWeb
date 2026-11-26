@@ -171,14 +171,3 @@ export async function uploadToFolder(folderId, file, name = file.name, descripti
   if (!res.ok) throw await driveError(res, 'Upload failed');
   return res.json();
 }
-
-/** A copy of a picked Drive file in `folderId`, as `name` (the original stays where it was). */
-export async function copyToFolder(fileId, folderId, name, description = '') {
-  const res = await fetch(`${API}/files/${encodeURIComponent(fileId)}/copy?fields=id,name`, {
-    method: 'POST',
-    headers: { authorization: `Bearer ${await getToken()}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ parents: [folderId], name, description }),
-  });
-  if (!res.ok) throw await driveError(res, 'Copy failed');
-  return res.json();
-}

@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/riverside/01.jpg",
-      "alt": "Riverside — Arne Nys",
+      "alt": "Riverside, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/riverside/02.jpg",
-      "alt": "Riverside — Arne Nys",
+      "alt": "Riverside, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/homarium/01.jpg",
-      "alt": "Homarium — Arne Nys",
+      "alt": "Homarium, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/homarium/02.jpg",
-      "alt": "Homarium — Arne Nys",
+      "alt": "Homarium, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -25,7 +25,7 @@
     },
     {
       "src": "/src/assets/artworks/homarium/03.jpg",
-      "alt": "Homarium — Arne Nys",
+      "alt": "Homarium, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5

@@ -62,8 +62,8 @@ const captionLines =
       description={
         props.work.data.description ||
         (captionLines.length
-          ? `${props.work.data.title} — ${captionLines.join(', ')}. A work by Arne Nys.`
-          : `${props.work.data.title}, a work by Arne Nys`)
+          ? `${props.work.data.title}, ${captionLines.join(', ')}. Arne Nys.`
+          : `${props.work.data.title}, Arne Nys`)
       }
       theme="sage"
       jsonLd={[

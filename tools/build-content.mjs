@@ -178,7 +178,7 @@ for (const f of files.sort()) {
      */
     gallery.push({
       src: `/src/assets/artworks/${slug}/${name}`,
-      alt: `${title} — Arne Nys`,
+      alt: `${title}, Arne Nys`,
       focalPoint: sub.mediaFocalPoint ? { x: sub.mediaFocalPoint.x, y: sub.mediaFocalPoint.y } : undefined,
     });
   }

@@ -9,7 +9,7 @@
   "gallery": [
     {
       "src": "/src/assets/artworks/obelia/01.jpg",
-      "alt": "Obelia — Arne Nys",
+      "alt": "Obelia, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
@@ -17,7 +17,7 @@
     },
     {
       "src": "/src/assets/artworks/obelia/02.jpg",
-      "alt": "Obelia — Arne Nys",
+      "alt": "Obelia, Arne Nys",
       "focalPoint": {
         "x": 0.5,
         "y": 0.5
