@@ -39,7 +39,11 @@
     // shared with the service account as Editor) and the Sheet "Archive" in it
     // (ids from their URLs). Off until GOOGLE_SA_KEY is set too.
     "ARCHIVE_FOLDER_ID": "1y8ZwrmCjHMes0GZF-Hh99jY4RbVyIVpV",
-    "ARCHIVE_SHEET_ID": "18CY_B_scfCrSmWU7zN3iQslxdPv1aynialIcsw_4FbA"
+    "ARCHIVE_SHEET_ID": "18CY_B_scfCrSmWU7zN3iQslxdPv1aynialIcsw_4FbA",
+    // Folders that are not works (expos, photoshoots, inspiration), left out
+    // with everything in them: names matched at any depth, case ignored,
+    // comma-separated; an entry with "/" is a path from the root instead.
+    "ARCHIVE_SKIP_FOLDERS": "Andere, inspiratie foto_s socials"
   }
   // Secrets (set with `npx wrangler secret put NAME`, never in this file):
   //   GH_APP_ID, GH_APP_PRIVATE_KEY      the arnenys-admin GitHub App

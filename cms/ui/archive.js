@@ -257,6 +257,11 @@ function notices(data) {
   if (unlisted) out.push(`${plural(unlisted, 'folder')} with photos ${unlisted === 1 ? 'is' : 'are'} not in the Sheet yet.`);
   for (const r of data.orphanRows)
     out.push(`Sheet row ${r.rowNumber}${r.workingTitle ? ` (“${r.workingTitle}”)` : ''}: ${r.problem.toLowerCase()}.`);
+  const loose = data.loose || [];
+  if (loose.length) {
+    const n = loose.reduce((s, l) => s + l.count, 0);
+    out.push(`${plural(n, 'photo')} ${n === 1 ? 'is' : 'are'} not inside a work folder: ${loose.map((l) => l.path.join('/')).join(', ')}.`);
+  }
   if (data.siteOnly.length)
     out.push(`${plural(data.siteOnly.length, 'work')} on the website ${data.siteOnly.length === 1 ? 'is' : 'are'} not linked to a Drive folder yet.`);
   if (!out.length) return null;

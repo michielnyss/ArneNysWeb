@@ -69,7 +69,7 @@ async function list(env, cfg) {
     site[slug] = JSON.parse(w.text);
     siteSha[slug] = w.sha;
   }
-  const out = buildArchive({ files, rootId: cfg.folderId, records: sheet.records, site, siteSha });
+  const out = buildArchive({ files, rootId: cfg.folderId, records: sheet.records, site, siteSha, skip: env.ARCHIVE_SKIP_FOLDERS });
   for (const w of out.works) {
     w.sig = await signFolder(cfg.key, w.folderId);
     for (const p of w.photos) p.thumb = thumbPath(w.folderId, w.sig, p.id);

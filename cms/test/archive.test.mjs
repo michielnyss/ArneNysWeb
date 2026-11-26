@@ -110,6 +110,42 @@ test('rows join by folder id; bad rows are reported, not dropped', () => {
   assert.ok(!works.some((w) => w.folderId === 'd'), 'an empty folder with no row is not a work');
 });
 
+test('skipped folders are left out with their whole subtree, rows still count', () => {
+  const files = [
+    dir('a', 'Andere', 'R'), dir('e', 'Expo', 'a'), img('1', '1.jpg', 'e'), img('2', '1.jpg', 'a'),
+    dir('m', 'Master', 'R'), dir('ma', 'ANDERE', 'm'), dir('n', 'Nieuwe map', 'ma'), img('3', '1.jpg', 'n'),
+    dir('i', 'inspiratie foto_s socials', 'R'), img('4', '1.jpg', 'i'),
+    dir('k', 'Keep', 'a'), img('5', '1.jpg', 'k'),
+    dir('w', 'Werk', 'm'), img('6', '1.jpg', 'w'),
+  ];
+  const ids = (out) => out.works.map((w) => w.folderId).sort();
+  const out = buildArchive({ files, rootId: 'R', records: [{ rowNumber: 2, folderId: 'k' }] });
+  assert.deepEqual(ids(out), ['k', 'w'], 'the default names, case ignored; a row inside one is kept');
+  assert.deepEqual([out.orphanRows, out.loose], [[], []], 'skipped folders are no tidy-up problem');
+  const set = buildArchive({ files, rootId: 'R', skip: 'expo, Master/Werk', records: [{ rowNumber: 2, folderId: 'k' }] });
+  assert.deepEqual(ids(set), ['i', 'k', 'n'], 'a set list replaces the default; "/" is a path');
+  assert.deepEqual(set.loose, [{ path: ['Andere'], count: 1 }], 'Andere now holds a work, so its own photos are loose');
+  assert.deepEqual(ids(buildArchive({ files, rootId: 'R', skip: '' })), ['e', 'i', 'k', 'n', 'w'], 'empty skips nothing');
+});
+
+test('a folder inside a work with a row is not a work; loose photos beside works are listed once', () => {
+  const files = [
+    dir('y', '2023', 'R'), img('yl', 'x.jpg', 'y'),
+    dir('t', 'Tekenen', 'y'), img('l1', 'a.jpg', 't'), img('l2', 'b.jpg', 't'),
+    dir('w', 'Kruimeldieven', 't'), img('w1', '1.jpg', 'w'),
+    dir('b', 'bewerkt', 'w'), img('b1', '1.jpg', 'b'), dir('bb', 'klein', 'b'), img('b2', '1.jpg', 'bb'),
+    dir('t2', 'Schilderen', 'y'), img('m1', '1.jpg', 't2'), dir('n', 'Nieuw', 't2'), img('n1', '1.jpg', 'n'),
+    dir('p', 'Project', 'y'), img('p1', '1.jpg', 'p'),
+  ];
+  const out = buildArchive({ files, rootId: 'R', records: [{ rowNumber: 2, folderId: 'w' }] });
+  assert.deepEqual(out.works.map((w) => w.folderId).sort(), ['n', 'p', 'w']);
+  assert.deepEqual(out.works.find((w) => w.folderId === 'w').photos.map((p) => p.id), ['w1'], 'nested photos are not added');
+  assert.deepEqual(out.loose, [
+    { path: ['2023'], count: 1 }, { path: ['2023', 'Schilderen'], count: 1 }, { path: ['2023', 'Tekenen'], count: 2 },
+  ], 'a type folder holding a work without a row yet counts too');
+  assert.ok(out.places.some((pl) => pl.type === 'Tekenen'), 'a type folder with loose photos is still a place for new works');
+});
+
 test('works are sorted newest year first, no year last', () => {
   const files = [dir('a', 'Zonder jaar', 'R'), img('1', '1.jpg', 'a'), dir('y1', '2020', 'R'), dir('b', 'B', 'y1'), img('2', '1.jpg', 'b'),
     dir('y2', '2025', 'R'), dir('c', 'C', 'y2'), img('3', '1.jpg', 'c')];

@@ -150,6 +150,13 @@ is; **Publish** copies a work's public fields and chosen photos into it.
   the website. The filters (Year, Technique — the Sheet's, else the type folder — and the
   website chips) combine with each other and the search, and live in the hash
   (`#/archive?year=2024&technique=Relief&site=on`), so Back and a reload keep them. A work is any folder with photos directly in it, or one a Sheet row names.
+  Except (`classify` in `src/archive.js`): folders named in `ARCHIVE_SKIP_FOLDERS`
+  (`wrangler.jsonc`; default `Andere, inspiratie foto_s socials`: comma-separated names
+  matched at any depth, case ignored, or a `a/b` path from the root) are left out with
+  everything in them; a folder inside a work that has a row (`bewerkt`, `a5`) is not a work
+  and its photos are not added to it; and photos lying in a type or year folder that holds
+  works are not a work either, only one "N photos are not inside a work folder" line in
+  the tidy-up notes. A Sheet row always makes its folder a work.
 - **New work** (`#/archive/new`): year, optional type and working title. The Worker makes
   `<year>/<type>/<year> - <working title>` (creating a year or type folder that is
   missing) and the Sheet row. See "Names in Drive" below.
