@@ -147,7 +147,9 @@ truth is the Google Drive folder "Arne Kunst" (`<year>/[<type>/]<work>/<photos>`
 is; **Publish** copies a work's public fields and chosen photos into it.
 
 - **All works** (`#/archive`): every work, by year, with search, filters and its state on
-  the website. A work is any folder with photos directly in it, or one a Sheet row names.
+  the website. The filters (Year, Technique — the Sheet's, else the type folder — and the
+  website chips) combine with each other and the search, and live in the hash
+  (`#/archive?year=2024&technique=Relief&site=on`), so Back and a reload keep them. A work is any folder with photos directly in it, or one a Sheet row names.
 - **New work** (`#/archive/new`): year, optional type and working title. The Worker makes
   `<year>/<type>/<year> - <working title>` (creating a year or type folder that is
   missing) and the Sheet row. See "Names in Drive" below.

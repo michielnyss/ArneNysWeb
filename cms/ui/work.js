@@ -12,7 +12,7 @@ import { COLUMNS, rowChanges } from '../shared/archive.js';
 import { cleanTitle, originalNote, parseWorkFolder, renamePlan, workFolderName } from '../shared/naming.js';
 import { planGallery, publicDefaults, webPhotoState } from '../shared/publish.js';
 import { $app, api, h, notice, toast, uploadBlob } from './dom.js';
-import { invalidateArchive, loadArchive, loading, problem, websiteBadge } from './archive.js';
+import { invalidateArchive, listHref, loadArchive, loading, problem, websiteBadge } from './archive.js';
 import {
   copyToFolder, ensureDriveToken, hasDriveToken, pickerAvailable, pickFromDrive, uploadAvailable, uploadToFolder,
 } from './drive.js';
@@ -90,7 +90,7 @@ export async function showArchiveWork(folderId) {
   if (!work) {
     C = null;
     return $app().replaceChildren(h('div', { class: 'panel narrow' }, h('p', {}, 'This folder is not in the archive (any more).'),
-      h('a', { class: 'btn', href: '#/archive' }, '← All works')));
+      h('a', { class: 'btn', href: listHref() }, '← All works')));
   }
   if (fresh || !(C.dirty.archive || C.dirty.web)) open(work, data, fresh ? 'archive' : C.tab);
   render();
@@ -130,7 +130,7 @@ function render() {
   const readOnly = C.data.readOnly;
   $app().replaceChildren(...[
     h('div', { class: 'archive work-card narrow' },
-      h('a', { class: 'back', href: '#/archive' }, '← All works'),
+      h('a', { class: 'back', href: listHref() }, '← All works'),
       h('div', { class: 'card-head' },
         h('div', {},
           h('h1', {}, w.title),

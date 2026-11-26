@@ -280,11 +280,11 @@ test('the archive needs sign-in like every other route', async () => {
 test('the All works screen: filters, search, year groups, badges and covers', async () => {
   const { FILTERS, filterWorks, groupByYear, websiteBadge, coverOf, workMeta } = await import('../ui/archive.js');
   const { works } = await (await get('/api/archive')).json();
-  const count = (f, q = '') => filterWorks(works, f, q).length;
+  const count = (site, q = '') => filterWorks(works, { site, q }).length;
   assert.deepEqual(FILTERS.map((f) => count(f.id)), [7, 4, 3, 3, 2]); // all, on (Blauwe echo is still live), off, changed, sold
   assert.equal(count('on') + count('off'), count('all'));
-  assert.deepEqual(filterWorks(works, 'all', 'galerie NOORD').map((w) => w.name), ['Blauwe echo'], 'searches the buyer');
-  assert.deepEqual(filterWorks(works, 'all', 'oil linen').map((w) => w.name), ['Avondwind'], 'every word must match');
+  assert.deepEqual(filterWorks(works, { q: 'galerie NOORD' }).map((w) => w.name), ['Blauwe echo'], 'searches the buyer');
+  assert.deepEqual(filterWorks(works, { q: 'oil linen' }).map((w) => w.name), ['Avondwind'], 'every word must match');
   assert.equal(count('sold', 'avondwind'), 0);
   assert.deepEqual(groupByYear(works).map(([y, ws]) => [y, ws.length]), [[2026, 1], [2025, 1], [2024, 4], [2022, 1]]);
   const by = Object.fromEntries(works.map((w) => [w.name, w]));
@@ -295,4 +295,52 @@ test('the All works screen: filters, search, year groups, badges and covers', as
   assert.equal(workMeta(by['buis 3']), 'Working title: “buis 3” · Installation · 5 photos');
   assert.equal(coverOf(by.Avondwind).id, by.Avondwind.row.websitePhotos[0]);
   assert.equal(coverOf({ photos: [], row: null }), null);
+});
+
+test('the All works filters: technique, year, website and search combine, with counts and a hash', async () => {
+  const { filterWorks, filterChoices, listHash, parseListHash, isListHash, techniqueOf, NO_FILTERS } = await import('../ui/archive.js');
+  const w = (name, year, technique, type, live = false, sold = false) => ({
+    name, title: name, path: [name], year, type, photos: [],
+    row: technique || sold ? { technique, sold } : null,
+    website: { live, state: live ? 'on' : 'off', reasons: [] },
+  });
+  const works = [
+    w('A', 2025, 'Relief', 'Beeld', true),
+    w('B', 2025, null, 'Schilderij'),
+    w('C', 2024, 'relief', null, false, true),
+    w('D', 2024, 'Oil on linen', 'Schilderij', true),
+    w('E', null, null, null),
+  ];
+  const names = (f) => filterWorks(works, f).map((x) => x.name);
+  assert.equal(techniqueOf(works[1]), 'Schilderij', 'no technique: the type folder');
+  assert.equal(techniqueOf(works[4]), '');
+  assert.deepEqual(names({}), ['A', 'B', 'C', 'D', 'E']);
+  assert.deepEqual(names({ year: '2025' }), ['A', 'B']);
+  assert.deepEqual(names({ year: '' }), ['E'], 'unknown year');
+  assert.deepEqual(names({ technique: 'Relief' }), ['A', 'C'], 'case does not matter');
+  assert.deepEqual(names({ technique: 'relief', site: 'sold' }), ['C']);
+  assert.deepEqual(names({ technique: '' }), ['E'], 'no technique');
+  assert.deepEqual(names({ year: '2024', site: 'on' }), ['D']);
+  assert.deepEqual(names({ year: '2024', site: 'off' }), ['C']);
+  assert.deepEqual(names({ technique: 'Schilderij', q: 'b' }), ['B']);
+  assert.deepEqual(names({ year: '2025', technique: 'Oil on linen' }), []);
+
+  const c = filterChoices(works, { ...NO_FILTERS, year: '2024' });
+  const pairs = (list) => list.map((o) => [o.label, o.n]);
+  assert.deepEqual(pairs(c.year), [['All years', 5], ['2025', 2], ['2024', 2], ['Unknown year', 1]], 'years ignore their own filter');
+  assert.deepEqual(pairs(c.technique), [['All techniques', 2], ['Oil on linen', 1], ['Relief', 1], ['Schilderij', 0], ['No technique', 0]]);
+  assert.deepEqual(pairs(c.site), [['All', 2], ['On website', 1], ['Not on website', 1], ['Changed since publish', 0], ['Sold', 1]]);
+  assert.deepEqual(pairs(filterChoices(works, { technique: 'Gone' }).technique).find(([l]) => l === 'Gone'), ['Gone', 0], 'a chosen value stays a choice');
+  assert.deepEqual(pairs(filterChoices(works.slice(0, 2)).year), [['All years', 2], ['2025', 2]], 'no "Unknown year" when every work has one');
+
+  const f = { site: 'on', year: '2024', technique: 'Oil on linen', q: 'blue echo' };
+  const hash = listHash(f);
+  assert.equal(hash, '#/archive?year=2024&technique=Oil%20on%20linen&site=on&q=blue%20echo');
+  assert.deepEqual(parseListHash(hash), f);
+  assert.deepEqual(parseListHash(listHash({ year: '' })), { ...NO_FILTERS, year: '' }, 'unknown year round-trips');
+  assert.equal(listHash(NO_FILTERS), '#/archive');
+  assert.deepEqual(parseListHash('#/archive'), NO_FILTERS);
+  assert.equal(parseListHash('#/archive?site=nonsense').site, 'all');
+  assert.ok(isListHash('#/archive') && isListHash(hash));
+  assert.ok(!isListHash('#/archive/new') && !isListHash('#/archived'));
 });

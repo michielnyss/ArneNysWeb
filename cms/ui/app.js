@@ -5,7 +5,7 @@
 import Sortable from 'sortablejs';
 import { compareWorks, newWorkData, NEW_WORK_ORDER } from '../shared/artwork.js';
 import { $app, api, clearToast, h, notice, toast, uploadBlob } from './dom.js';
-import { showArchive, showNewWork } from './archive.js';
+import { isListHash, showArchive, showNewWork } from './archive.js';
 import { leaveWork, showArchiveWork } from './work.js';
 import { configureDrive, pickFromDrive, pickerAvailable } from './drive.js';
 import {
@@ -88,10 +88,10 @@ function route() {
   if (!leaveWork(hash)) return; // the archive's work card, if one is open with changes
   if (hash.startsWith('#/work/')) return showEditor(decodeURIComponent(hash.slice(7)));
   if (hash === '#/new') return showEditor(null);
-  if (hash === '#/archive' || hash.startsWith('#/archive/')) {
+  if (isListHash(hash) || hash.startsWith('#/archive/')) {
     if (!leaveEditor()) return;
     setScreen('archive');
-    if (hash === '#/archive') return showArchive();
+    if (isListHash(hash)) return showArchive();
     if (hash === '#/archive/new') return showNewWork();
     return showArchiveWork(decodeURIComponent(hash.slice(10)));
   }

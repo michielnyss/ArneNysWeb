@@ -6,7 +6,7 @@ import { WEBSITE_LABELS } from '../shared/archive.js';
 import { YEAR_MAX, YEAR_MIN } from '../shared/artwork.js';
 import { $app, api, field, h, toast } from './dom.js';
 
-const A = { data: null, query: '', filter: 'all' };
+const A = { data: null, list: '#/archive' };
 
 // ------------------------------------------------------------ pure helpers
 
@@ -25,11 +25,86 @@ export function searchText(w) {
   return [w.title, ...w.path, ...SEARCHED.map((k) => w.row?.[k])].filter((v) => v !== null && v !== undefined).join(' ').toLowerCase();
 }
 
-export function filterWorks(works, filter, query) {
-  const test = (FILTERS.find((f) => f.id === filter) || FILTERS[0]).test;
-  const words = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
-  return works.filter((w) => test(w) && words.every((word) => searchText(w).includes(word)));
+/** The values the Year and Technique filters use ('' = the work has none). */
+export const yearOf = (w) => (w.year === null || w.year === undefined ? '' : String(w.year));
+export const techniqueOf = (w) => String(w.row?.technique || w.type || '').trim();
+
+/** The same filter value? Case does not matter ("relief" is "Relief"). */
+const same = (a, b) => a.toLowerCase() === b.toLowerCase();
+
+/** The list's filters: site (a FILTERS id), year and technique ('*' = all, '' = none given), q (search). */
+export const NO_FILTERS = { site: 'all', year: '*', technique: '*', q: '' };
+
+/** Does a work pass the filters? `skip` leaves one out (for the counts next to that filter). */
+function passes(w, f, skip) {
+  const site = (FILTERS.find((x) => x.id === f.site) || FILTERS[0]).test;
+  const words = String(f.q || '').toLowerCase().split(/\s+/).filter(Boolean);
+  return (skip === 'site' || site(w))
+    && (skip === 'year' || f.year === '*' || same(yearOf(w), f.year))
+    && (skip === 'technique' || f.technique === '*' || same(techniqueOf(w), f.technique))
+    && words.every((word) => searchText(w).includes(word));
 }
+
+/** The works that pass every filter and the search (all combined). */
+export function filterWorks(works, filters = {}) {
+  const f = { ...NO_FILTERS, ...filters };
+  return works.filter((w) => passes(w, f));
+}
+
+/**
+ * The choices for each filter, each with how many works it would show given
+ * the other filters: { site, year, technique }, each [{ id, label, n }].
+ * Years newest first, then "Unknown year"; techniques A-Z, then "No
+ * technique". A chosen value stays a choice even if no work has it (any more).
+ */
+export function filterChoices(works, filters = {}) {
+  const f = { ...NO_FILTERS, ...filters };
+  const matching = (skip) => works.filter((w) => passes(w, f, skip));
+  const choices = (key, of, all, none, order) => {
+    const base = matching(key);
+    const values = new Map(); // lower case -> the first spelling
+    for (const v of [...works.map(of), ...(f[key] === '*' ? [] : [f[key]])]) if (!values.has(v.toLowerCase())) values.set(v.toLowerCase(), v);
+    return [{ id: '*', label: all, n: base.length },
+      ...[...values.values()].sort(order).map((v) => ({ id: v, label: v || none, n: base.filter((w) => same(of(w), v)).length }))];
+  };
+  const last = (a, b) => (a === '') - (b === ''); // "none" at the end
+  return {
+    site: FILTERS.map((x) => ({ id: x.id, label: x.label, n: matching('site').filter(x.test).length })),
+    year: choices('year', yearOf, 'All years', 'Unknown year', (a, b) => last(a, b) || Number(b) - Number(a)),
+    technique: choices('technique', techniqueOf, 'All techniques', 'No technique',
+      (a, b) => last(a, b) || a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true })),
+  };
+}
+
+/** "#/archive?year=2024&technique=Relief&site=on&q=oil" -> filters (an unknown site falls back to all). */
+export function parseListHash(hash) {
+  const i = String(hash || '').indexOf('?');
+  const p = new URLSearchParams(i < 0 ? '' : hash.slice(i + 1));
+  const site = p.get('site');
+  return {
+    site: FILTERS.some((x) => x.id === site) ? site : 'all',
+    year: p.get('year') ?? '*',
+    technique: p.get('technique') ?? '*',
+    q: p.get('q') || '',
+  };
+}
+
+/** The other way round; a filter left at "all" stays out of the hash. */
+export function listHash(filters = {}) {
+  const f = { ...NO_FILTERS, ...filters };
+  const p = new URLSearchParams();
+  if (f.year !== '*') p.set('year', f.year);
+  if (f.technique !== '*') p.set('technique', f.technique);
+  if (f.site !== 'all') p.set('site', f.site);
+  if (f.q.trim()) p.set('q', f.q.trim());
+  const qs = p.toString().replace(/\+/g, '%20');
+  return qs ? `#/archive?${qs}` : '#/archive';
+}
+
+export const isListHash = (hash) => hash === '#/archive' || String(hash).startsWith('#/archive?');
+
+/** The list as it was last shown, filters and all: where "← All works" goes back to. */
+export const listHref = () => A.list;
 
 /** [[year or null, works]], in the order the works come (newest year first). */
 export function groupByYear(works) {
@@ -101,19 +176,50 @@ export async function showArchive(force = false) {
   } catch (e) {
     return problem(e);
   }
-  if (location.hash !== '#/archive') return; // moved on while loading
+  if (!isListHash(location.hash)) return; // moved on while loading
 
+  // The filters live in the hash, so Back from a work card and a reload keep them.
+  // The top bar's "Archive" link comes back to it too.
+  const f = parseListHash(location.hash);
+  const remember = () => {
+    A.list = listHash(f);
+    document.querySelector('[data-nav=archive]')?.setAttribute('href', A.list);
+  };
+  const set = (change) => {
+    Object.assign(f, change);
+    remember();
+    history.replaceState(null, '', A.list); // no extra history entry, no hashchange
+    render();
+  };
+  remember();
   const results = h('div', { id: 'archive-results', 'aria-live': 'polite' });
-  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Show' });
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Website' });
+  const select = (key, label) => h('select', { 'aria-label': label, onchange: (e) => set({ [key]: e.target.value }) });
+  const year = select('year', 'Year');
+  const technique = select('technique', 'Technique');
+  const search = h('input', {
+    type: 'search', value: f.q, placeholder: 'Search title, working title, technique, buyer…', 'aria-label': 'Search the works',
+    oninput: (e) => set({ q: e.target.value }),
+  });
+  const clear = h('button', { class: 'chip clear-filters', type: 'button', onclick: () => { search.value = ''; set(NO_FILTERS); } }, 'Clear filters');
+  const fill = (el, list, chosen) => {
+    el.replaceChildren(...list.map((o) => h('option', { value: o.id }, `${o.label} (${o.n})`)));
+    el.value = chosen;
+    el.classList.toggle('on', chosen !== '*');
+  };
   const render = () => {
-    chips.replaceChildren(...FILTERS.map((f) => h('button', {
-      class: `chip${A.filter === f.id ? ' on' : ''}`, type: 'button', 'aria-pressed': String(A.filter === f.id),
-      onclick: () => { A.filter = f.id; render(); },
-    }, `${f.label} ${data.works.filter(f.test).length}`)));
-    const shown = filterWorks(data.works, A.filter, A.query);
+    const c = filterChoices(data.works, f);
+    chips.replaceChildren(...c.site.map((x) => h('button', {
+      class: `chip${f.site === x.id ? ' on' : ''}`, type: 'button', 'aria-pressed': String(f.site === x.id),
+      onclick: () => set({ site: x.id }),
+    }, `${x.label} ${x.n}`)));
+    fill(year, c.year, f.year);
+    fill(technique, c.technique, f.technique);
+    clear.hidden = A.list === '#/archive';
+    const shown = filterWorks(data.works, f);
     results.replaceChildren(...(shown.length
-      ? groupByYear(shown).map(([year, works]) => h('section', { class: 'year-group' },
-        h('div', { class: 'year-head' }, h('h2', {}, year ? String(year) : 'No year'), h('span', {}, plural(works.length, 'work'))),
+      ? groupByYear(shown).map(([y, works]) => h('section', { class: 'year-group' },
+        h('div', { class: 'year-head' }, h('h2', {}, y ? String(y) : 'No year'), h('span', {}, plural(works.length, 'work'))),
         h('ul', { class: 'cards' }, works.map(card))))
       : [h('p', { class: 'lede' }, data.works.length ? 'No works match.' : 'No works yet: the archive folder has no photo folders.')]));
   };
@@ -131,11 +237,10 @@ export async function showArchive(force = false) {
       ),
       notices(data),
       h('div', { class: 'archive-bar' },
-        h('input', {
-          type: 'search', value: A.query, placeholder: 'Search title, working title, technique, buyer…', 'aria-label': 'Search the works',
-          oninput: (e) => { A.query = e.target.value; render(); },
-        }),
+        search,
+        h('div', { class: 'filter-selects' }, year, technique),
         chips,
+        clear,
       ),
       results,
     ),
@@ -220,7 +325,7 @@ export async function showNewWork() {
     }
   };
   $app().replaceChildren(h('form', { class: 'archive narrow', onsubmit: create },
-    h('a', { class: 'back', href: '#/archive' }, '← All works'),
+    h('a', { class: 'back', href: listHref() }, '← All works'),
     h('h1', {}, 'New work'),
     h('p', { class: 'lede' }, 'This makes a folder for the work in the Drive folder, and a row in the Sheet.'),
     h('section', { class: 'panel' },
@@ -229,7 +334,7 @@ export async function showNewWork() {
       field('Working title', title, 'n-title'),
       h('p', { class: 'hint' }, 'The folder goes in “year / type / year - working title”. A year or type folder that is not there yet is made too. Photos added later are named “working title - 01”, “- 02”, …'),
     ),
-    h('div', { class: 'action-bar' }, h('span', {}), h('span', { class: 'bar-buttons' }, h('a', { class: 'btn quiet', href: '#/archive' }, 'Cancel'), button)),
+    h('div', { class: 'action-bar' }, h('span', {}), h('span', { class: 'bar-buttons' }, h('a', { class: 'btn quiet', href: listHref() }, 'Cancel'), button)),
   ));
   title.focus();
 }
