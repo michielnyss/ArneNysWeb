@@ -298,7 +298,7 @@ async function saveArchive({ quiet = false } = {}) {
       toast(`The folder was renamed, but not all its photos: ${e.message}`, 'error');
     }
   }
-  if (!w.website.live) w.title = w.row?.workingTitle || w.name;
+  if (!w.website.live) w.title = w.row?.workingTitle || parseWorkFolder(w.name).title;
   C.edits = {};
   C.keepFolderName = false;
   C.dirty.archive = false;

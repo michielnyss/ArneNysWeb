@@ -7,7 +7,7 @@
 // (a new work before its first photo).
 
 import { assetSrc, YEAR_MAX, YEAR_MIN } from '../shared/artwork.js';
-import { cleanTitle, workFolderName } from '../shared/naming.js';
+import { cleanTitle, parseWorkFolder, workFolderName } from '../shared/naming.js';
 import { FOLDER } from './drive.js';
 
 export const folderUrl = (id) => `https://drive.google.com/drive/folders/${id}`;
@@ -149,7 +149,7 @@ export function buildArchive({ files, rootId, records = [], site = {}, siteSha =
       url: folderUrl(folderId),
       year: typeof row?.year === 'number' ? row.year : place.year,
       type: place.type,
-      title: website.title || row?.workingTitle || path.at(-1),
+      title: website.title || row?.workingTitle || parseWorkFolder(path.at(-1)).title,
       photos,
       row,
       website: { ...website, sha: siteSha[website.slug] ?? null, data: website.live ? site[website.slug] : null },
